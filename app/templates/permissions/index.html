@@ -1,0 +1,130 @@
+{% extends "base.html" %} {% block title %}Acessos • {{ project_name }}{%
+endblock %} {% block content %}
+<section class="hero-card p-4 p-lg-5 rounded-4 border shadow-sm mb-4">
+  <div class="row g-4 align-items-center">
+    <div class="col-lg-8">
+      <p class="text-uppercase text-muted fw-semibold small mb-2">
+        Administração
+      </p>
+      <h1 class="display-6 fw-bold mb-3">Matriz inicial de acessos</h1>
+      <p class="lead text-muted mb-0">
+        Consulta dos perfis e permissões disponíveis no sistema. A manutenção
+        completa dos vínculos será feita nas telas administrativas específicas.
+      </p>
+    </div>
+    <div class="col-lg-4">
+      <div class="status-panel rounded-4 p-4">
+        <h2 class="h6 fw-semibold mb-3">Resumo da matriz</h2>
+        <div class="d-flex justify-content-between gap-3 small mb-2">
+          <span class="text-muted">Perfis</span>
+          <strong>{{ roles|length }}</strong>
+        </div>
+        <div class="d-flex justify-content-between gap-3 small">
+          <span class="text-muted">Grupos de permissão</span>
+          <strong>{{ permissions_by_group|length }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+        <div>
+          <h2 class="h5 fw-semibold mb-1">Perfis</h2>
+          <p class="text-muted small mb-0">
+            Papéis usados para agrupar permissões.
+          </p>
+        </div>
+        <span class="badge text-bg-light border">{{ roles|length }}</span>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for role in roles %}
+        <div class="list-group-item px-0 bg-transparent">
+          <div class="d-flex justify-content-between gap-3">
+            <div>
+              <div class="fw-semibold">{{ role.nome }}</div>
+              <div class="small text-muted"><code>{{ role.codigo }}</code></div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-muted small">Nenhum perfil cadastrado.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-8">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <div
+        class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+      >
+        <div>
+          <h2 class="h5 fw-semibold mb-1">Permissões por grupo</h2>
+          <p class="text-muted small mb-0">
+            Use esta matriz para conferir o significado de cada permissão antes
+            de liberar acessos.
+          </p>
+        </div>
+      </div>
+
+      <div class="accordion" id="permissionsAccordion">
+        {% for group, permissions in permissions_by_group.items() %}
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="heading{{ loop.index }}">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#group{{ loop.index }}"
+              aria-expanded="false"
+              aria-controls="group{{ loop.index }}"
+            >
+              <span class="fw-semibold">{{ group }}</span>
+              <span class="badge text-bg-light border ms-2"
+                >{{ permissions|length }}</span
+              >
+            </button>
+          </h3>
+          <div
+            id="group{{ loop.index }}"
+            class="accordion-collapse collapse"
+            aria-labelledby="heading{{ loop.index }}"
+            data-bs-parent="#permissionsAccordion"
+          >
+            <div class="accordion-body">
+              <div class="row g-3">
+                {% for permission in permissions %}
+                <div class="col-md-6">
+                  <div class="border rounded-4 p-3 h-100 bg-body-tertiary">
+                    <div class="fw-semibold">{{ permission.nome }}</div>
+                    <code class="small d-inline-block mt-1"
+                      >{{ permission.codigo }}</code
+                    >
+                    <p class="small text-muted mb-0 mt-2">
+                      {{ permission.descricao }}
+                    </p>
+                  </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-muted small">
+                  Nenhuma permissão neste grupo.
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info rounded-4 mb-0">
+          Nenhuma permissão cadastrada para exibição.
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

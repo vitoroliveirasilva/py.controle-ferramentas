@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-4">
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Central de comando</p>
+    <h1 class="h3 fw-bold mb-1">Dashboard operacional</h1>
+    <p class="text-muted mb-2">
+      Visão consolidada de ferramentas, inventários, divergências, transferências e ocorrências.
+    </p>
+    <span class="badge text-bg-light border">Escopo: {{ dashboard.scope_description }}</span>
+  </div>
+  <div class="d-flex flex-column flex-sm-row gap-2">
+    {% if can('reports.view') %}
+    <a class="btn btn-outline-secondary" href="{{ url_for('reports.index') }}">Relatórios</a>
+    {% endif %}
+    {% if can('inventories.create') %}
+    <a class="btn btn-primary" href="{{ url_for('inventories.create') }}">Novo inventário</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  {% for card in dashboard.cards %}
+  <div class="col-sm-6 col-xl-4 col-xxl-3">
+    {% set href = card_url(card.url) %}
+    {% if href %}
+    <a
+      href="{{ href }}"
+      class="dashboard-card dashboard-card-{{ card.level }} rounded-4 border p-3 h-100 d-block text-decoration-none"
+      aria-label="Abrir {{ card.title }}"
+    >
+    {% else %}
+    <div class="dashboard-card dashboard-card-{{ card.level }} rounded-4 border p-3 h-100 d-block">
+    {% endif %}
+      <div class="d-flex justify-content-between gap-3 align-items-start">
+        <div>
+          <p class="text-muted small fw-semibold mb-1">{{ card.title }}</p>
+          <div class="display-6 fw-bold dashboard-card-value">{{ card.value }}</div>
+        </div>
+        <span class="dashboard-pill">{{ card.level }}</span>
+      </div>
+      <p class="text-muted small mb-0 mt-2">{{ card.description }}</p>
+    {% if href %}</a>{% else %}</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+        <div>
+          <h2 class="h5 fw-semibold mb-1">Ferramentas por status</h2>
+          <p class="text-muted small mb-0">Distribuição das ferramentas no escopo atual.</p>
+        </div>
+        {% if can('tools.view') %}
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('tools.index') }}">Abrir ferramentas</a>
+        {% endif %}
+      </div>
+      {% if dashboard.tools_by_status %}
+      <div class="vstack gap-3">
+        {% set max_status = dashboard.tools_by_status | map(attribute='total') | max %}
+        {% for row in dashboard.tools_by_status %}
+        {% set pct = (row.total / max_status * 100) if max_status else 0 %}
+        <div>
+          <div class="d-flex justify-content-between small mb-1">
+            <span class="fw-semibold">{{ row.status|replace('_', ' ')|title }}</span>
+            <span>{{ row.total }}</span>
+          </div>
+          <div
+            class="progress dashboard-progress"
+            role="progressbar"
+            aria-label="{{ row.status|replace('_', ' ')|title }}"
+            aria-valuenow="{{ pct|round(0) }}"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div class="progress-bar" style="width: {{ pct }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Nenhuma ferramenta encontrada no escopo atual.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="col-lg-6">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <h2 class="h5 fw-semibold mb-1">Ferramentas por criticidade</h2>
+      <p class="text-muted small mb-3">Ajuda a priorizar itens que exigem mais atenção operacional.</p>
+      {% if dashboard.tools_by_criticality %}
+      <div class="row g-3">
+        {% for row in dashboard.tools_by_criticality %}
+        <div class="col-sm-6">
+          <div class="border rounded-4 p-3 h-100 bg-light-subtle">
+            <p class="text-muted small mb-1">{{ row.criticidade|replace('_', ' ')|title }}</p>
+            <div class="h3 fw-bold mb-0">{{ row.total }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Sem dados de criticidade para exibir.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-4">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+        <div>
+          <h2 class="h5 fw-semibold mb-1">Divergências abertas</h2>
+          <p class="text-muted small mb-0">Pendências que precisam de regularização explícita.</p>
+        </div>
+        {% if can('inventories.view') %}
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('inventories.index') }}">Ver inventários</a>
+        {% endif %}
+      </div>
+      {% if dashboard.recent_divergences %}
+      <div class="list-group list-group-flush dashboard-list">
+        {% for divergence in dashboard.recent_divergences %}
+        <div class="list-group-item px-0">
+          <div class="fw-semibold">{{ divergence.tipo_divergencia|replace('_', ' ')|title }}</div>
+          <div class="small text-muted">{{ divergence.descricao|truncate(90) }}</div>
+          <span class="badge text-bg-warning mt-2">{{ divergence.status }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Nenhuma divergência aberta no escopo atual.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="col-xl-4">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+        <div>
+          <h2 class="h5 fw-semibold mb-1">Transferências pendentes</h2>
+          <p class="text-muted small mb-0">Confirmações que ainda aguardam origem ou destino.</p>
+        </div>
+        {% if can('transfers.view') %}
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('transfers.index') }}">Ver transferências</a>
+        {% endif %}
+      </div>
+      {% if dashboard.pending_transfers %}
+      <div class="list-group list-group-flush dashboard-list">
+        {% for transfer in dashboard.pending_transfers %}
+        <a class="list-group-item px-0 text-decoration-none" href="{{ url_for('transfers.detail', transfer_id=transfer.id_transfer) }}">
+          <div class="fw-semibold">{{ transfer.codigo }}</div>
+          <div class="small text-muted">{{ transfer.destino_responsavel_snapshot or 'Destino não informado' }}</div>
+          <span class="badge text-bg-light border mt-2">{{ transfer.status }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Nenhuma transferência pendente.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="col-xl-4">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+        <div>
+          <h2 class="h5 fw-semibold mb-1">Inventários pendentes</h2>
+          <p class="text-muted small mb-0">Inventários em andamento ou aguardando assinatura.</p>
+        </div>
+        {% if can('inventories.view') %}
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('inventories.index') }}">Ver inventários</a>
+        {% endif %}
+      </div>
+      {% if dashboard.pending_inventories %}
+      <div class="list-group list-group-flush dashboard-list">
+        {% for inventory in dashboard.pending_inventories %}
+        <a class="list-group-item px-0 text-decoration-none" href="{{ url_for('inventories.detail', inventory_id=inventory.id_inventory) }}">
+          <div class="fw-semibold">{{ inventory.codigo }} • {{ inventory.titulo }}</div>
+          <div class="small text-muted">{{ inventory.escopo_responsavel_snapshot or inventory.escopo_local_snapshot or 'Escopo não informado' }}</div>
+          <span class="badge text-bg-light border mt-2">{{ inventory.status }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Nenhum inventário pendente.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <h2 class="h5 fw-semibold mb-1">Top reincidências</h2>
+      <p class="text-muted small mb-3">Ferramentas com maior volume de divergências e ocorrências.</p>
+      {% if dashboard.top_reincidences %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Ferramenta</th>
+              <th>Divergências</th>
+              <th>Ocorrências</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in dashboard.top_reincidences %}
+            <tr>
+              <td data-label="Código" class="fw-semibold">{{ row.codigo_interno }}</td>
+              <td data-label="Ferramenta">{{ row.nome }}</td>
+              <td data-label="Divergências">{{ row.divergencias }}</td>
+              <td data-label="Ocorrências">{{ row.ocorrencias }}</td>
+              <td data-label="Total"><span class="badge text-bg-danger">{{ row.total_eventos }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Sem reincidências registradas.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="col-lg-5">
+    <section class="module-card rounded-4 border p-4 h-100">
+      <h2 class="h5 fw-semibold mb-1">Idade das transferências pendentes</h2>
+      <p class="text-muted small mb-3">Use esta visão para priorizar confirmações mais antigas.</p>
+      {% if dashboard.transfer_age_buckets %}
+      <div class="vstack gap-3">
+        {% set max_bucket = dashboard.transfer_age_buckets | map(attribute='total') | max %}
+        {% for row in dashboard.transfer_age_buckets %}
+        {% set pct = (row.total / max_bucket * 100) if max_bucket else 0 %}
+        <div>
+          <div class="d-flex justify-content-between small mb-1">
+            <span class="fw-semibold">{{ row.faixa }}</span>
+            <span>{{ row.total }}</span>
+          </div>
+          <div
+            class="progress dashboard-progress"
+            role="progressbar"
+            aria-label="Transferências {{ row.faixa }}"
+            aria-valuenow="{{ pct|round(0) }}"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div class="progress-bar" style="width: {{ pct }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Nenhuma transferência pendente para exibir.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

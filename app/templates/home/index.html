@@ -1,0 +1,257 @@
+{% extends "base.html" %} {% block title %}Início • {{ project_name }}{%
+endblock %} {% block content %} {% if current_user.is_authenticated %}
+<section class="hero-card p-4 p-lg-5 rounded-4 border shadow-sm mb-4">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-7">
+      <p class="text-uppercase text-muted fw-semibold small mb-2">Operação</p>
+      <h1 class="display-6 fw-bold mb-3">
+        Olá, {{ current_user.display_name }}.
+      </h1>
+      <p class="lead text-muted mb-4">
+        Acesse os módulos liberados para seu perfil. As ações sensíveis são
+        registradas para auditoria.
+      </p>
+      <div class="d-flex flex-column flex-sm-row gap-2">
+        {% if can('dashboard.view') %}
+        <a
+          class="btn btn-primary btn-lg"
+          href="{{ url_for('dashboard.index') }}"
+          >Abrir dashboard</a
+        >
+        {% endif %}
+        <a
+          class="btn btn-outline-secondary btn-lg"
+          href="{{ url_for('permissions.my_access') }}"
+          >Ver meu acesso</a
+        >
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="status-panel rounded-4 p-4">
+        <h2 class="h5 fw-semibold mb-3">Fluxo recomendado</h2>
+        <ol class="m-0 ps-3 status-list">
+          <li>Consulte pendências no dashboard.</li>
+          <li>Localize ferramentas, custódias ou transferências.</li>
+          <li>Registre inventários e ocorrências quando necessário.</li>
+          <li>Acompanhe auditoria e relatórios conforme permissão.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="mb-3">
+  <h2 class="h5 fw-bold mb-1">Módulos disponíveis</h2>
+  <p class="text-muted mb-0">
+    Os atalhos abaixo respeitam suas permissões atuais.
+  </p>
+</div>
+
+<div class="row g-3">
+  {% if can('dashboard.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('dashboard.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Dashboard</h3>
+        <span class="badge text-bg-light border">Visão geral</span>
+      </div>
+      <p class="text-muted mb-0">
+        Indicadores, pendências e alertas operacionais.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('tools.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('tools.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Ferramentas</h3>
+        <span class="badge text-bg-light border">Cadastro</span>
+      </div>
+      <p class="text-muted mb-0">
+        Consulta e administração do cadastro de ferramentas.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('inventories.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('inventories.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Inventários</h3>
+        <span class="badge text-bg-light border">Conferência</span>
+      </div>
+      <p class="text-muted mb-0">
+        Abertura, conferência, divergências e finalização.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('custody.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('custody.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Custódias</h3>
+        <span class="badge text-bg-light border">Rastreabilidade</span>
+      </div>
+      <p class="text-muted mb-0">
+        Responsáveis atuais e histórico de posse das ferramentas.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('transfers.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('transfers.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Transferências</h3>
+        <span class="badge text-bg-light border">Movimentação</span>
+      </div>
+      <p class="text-muted mb-0">
+        Solicitação, aceite, recusa e histórico de movimentações.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('occurrences.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('occurrences.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Ocorrências</h3>
+        <span class="badge text-bg-light border">Registro</span>
+      </div>
+      <p class="text-muted mb-0">
+        Perdas, danos, baixas, manutenção e regularizações.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('categories.manage') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('categories.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Categorias</h3>
+        <span class="badge text-bg-light border">Regras</span>
+      </div>
+      <p class="text-muted mb-0">
+        Classificação e regras de controle das ferramentas.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('locations.manage') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('locations.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Locais</h3>
+        <span class="badge text-bg-light border">Estrutura</span>
+      </div>
+      <p class="text-muted mb-0">
+        Filiais, oficinas, sites, departamentos e almoxarifados.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('users.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('users.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Usuários</h3>
+        <span class="badge text-bg-light border">Acesso</span>
+      </div>
+      <p class="text-muted mb-0">
+        Usuários locais autorizados pelo banco de dados.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can('reports.view') %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('reports.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Relatórios</h3>
+        <span class="badge text-bg-light border">Exportação</span>
+      </div>
+      <p class="text-muted mb-0">
+        Consultas, CSV, Excel e visão para impressão/PDF.
+      </p>
+    </a>
+  </div>
+  {% endif %} {% if can_any(['roles.view', 'permissions.manage']) %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-block text-decoration-none"
+      href="{{ url_for('permissions.index') }}"
+    >
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <h3 class="h5 fw-semibold mb-0">Acessos</h3>
+        <span class="badge text-bg-light border">Permissões</span>
+      </div>
+      <p class="text-muted mb-0">
+        Perfis, permissões e consulta da matriz de acesso.
+      </p>
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<section class="hero-card p-4 p-lg-5 rounded-4 border shadow-sm">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-7">
+      <p class="text-uppercase text-muted fw-semibold small mb-2">
+        Sistema corporativo auditável
+      </p>
+      <h1 class="display-6 fw-bold mb-3">
+        Controle de ferramentas com autenticação e permissionamento
+      </h1>
+      <p class="lead text-muted mb-4">
+        Acesse com sua conta corporativa Microsoft. Depois do login, o sistema
+        valida seu cadastro local e suas permissões no banco.
+      </p>
+      <div class="d-flex flex-column flex-sm-row gap-2">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}"
+          >Entrar com Microsoft</a
+        >
+        <a
+          class="btn btn-outline-secondary btn-lg"
+          href="{{ url_for('health.readiness_check') }}"
+          >Ver readiness</a
+        >
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="status-panel rounded-4 p-4">
+        <h2 class="h5 fw-semibold mb-3">Recursos principais</h2>
+        <ul class="list-unstyled m-0 status-list">
+          <li>Autenticação Microsoft com autorização local.</li>
+          <li>Controle de custódia e transferências.</li>
+          <li>Inventários com divergências e evidências.</li>
+          <li>Ocorrências, assinaturas e auditoria.</li>
+          <li>Relatórios para acompanhamento operacional.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %} {% endblock %}

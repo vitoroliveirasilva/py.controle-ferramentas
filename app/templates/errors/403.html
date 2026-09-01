@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% set error_code = "403" %}
+{% set error_label = "Acesso negado" %}
+{% set error_title = message|default("Você não tem permissão para acessar esta área.", true) %}
+{% set error_description = "Seu usuário foi autenticado, mas não possui permissão suficiente para executar esta ação ou visualizar este recurso." %}
+{% set error_hint = "Confirme se está usando a conta correta. Caso precise desse acesso, solicite a liberação ao responsável pelo sistema." %}
+
+{% block title %}Erro 403 • {{ project_name }}{% endblock %}
+
+{% block content %}
+  {% include "errors/_error_page.html" %}
+{% endblock %}

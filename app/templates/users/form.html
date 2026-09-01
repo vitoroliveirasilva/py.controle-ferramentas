@@ -1,0 +1,104 @@
+{% extends "base.html" %} {% block title %}{{ 'Editar' if user else 'Novo' }}
+usuário • {{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">
+      Administração
+    </p>
+    <h1 class="h3 fw-bold mb-1">
+      {{ 'Editar usuário' if user else 'Novo usuário' }}
+    </h1>
+    <p class="text-muted mb-0">
+      Controle o acesso local autorizado após a autenticação Microsoft.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('users.index') }}"
+    >Voltar</a
+  >
+</div>
+
+<form
+  method="post"
+  novalidate
+  class="card rounded-4 border shadow-sm overflow-hidden"
+>
+  {{ form.hidden_tag() }}
+  <div class="card-body p-4">
+    <div class="row g-3">
+      <div class="col-lg-5">
+        {{ form.email.label(class='form-label') }} {{
+        form.email(class='form-control',
+        placeholder='nome.sobrenome@empresa.com.br') }}
+        <div class="form-text">Use o e-mail corporativo do usuário.</div>
+      </div>
+      <div class="col-lg-4">
+        {{ form.nome.label(class='form-label') }} {{
+        form.nome(class='form-control', placeholder='Nome exibido no sistema')
+        }}
+      </div>
+      <div class="col-lg-3">
+        {{ form.microsoft_oid.label(class='form-label') }} {{
+        form.microsoft_oid(class='form-control', placeholder='OID Microsoft') }}
+        <div class="form-text">
+          Quando disponível, vincula o usuário ao identificador da Microsoft.
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-check option-check rounded-4 border p-3 h-100">
+          {{ form.ativo(class='form-check-input') }}
+          <span class="form-check-label fw-semibold"
+            >{{ form.ativo.label.text }}</span
+          >
+          <span class="d-block small text-muted mt-1"
+            >Permite uso normal após autenticação.</span
+          >
+        </label>
+      </div>
+      <div class="col-md-3">
+        <label class="form-check option-check rounded-4 border p-3 h-100">
+          {{ form.bloqueado(class='form-check-input') }}
+          <span class="form-check-label fw-semibold"
+            >{{ form.bloqueado.label.text }}</span
+          >
+          <span class="d-block small text-muted mt-1"
+            >Impede acesso mesmo se o login Microsoft funcionar.</span
+          >
+        </label>
+      </div>
+      <div class="col-md-6">
+        {{ form.bloqueio_motivo.label(class='form-label') }} {{
+        form.bloqueio_motivo(class='form-control', placeholder='Motivo do
+        bloqueio, quando aplicável') }}
+      </div>
+      <div class="col-12">
+        {{ form.observacoes.label(class='form-label') }} {{
+        form.observacoes(class='form-control', rows=3, placeholder='Observações
+        administrativas sobre este usuário') }}
+      </div>
+      <div class="col-12">
+        {{ form.motivo.label(class='form-label') }} {{
+        form.motivo(class='form-control', rows=2, placeholder='Informe o motivo
+        da criação ou alteração') }}
+        <div class="form-text">
+          Esse campo apoia a auditoria de mudanças de acesso.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="card-footer bg-transparent border-top p-4 d-flex flex-column flex-sm-row justify-content-end gap-2"
+  >
+    <a class="btn btn-outline-secondary" href="{{ url_for('users.index') }}"
+      >Cancelar</a
+    >
+    <button class="btn btn-primary" type="submit">Salvar usuário</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%}
+<div class="flash-stack" aria-live="polite" aria-atomic="true">
+  {% for category, message in messages %} {% set alert_type = category if
+  category in ['success', 'info', 'warning', 'danger'] else 'info' %} {% set
+  alert_title = { 'success': 'Ação concluída', 'info': 'Informação', 'warning':
+  'Atenção', 'danger': 'Não foi possível concluir' }.get(alert_type,
+  'Informação') %} {% set alert_icon = { 'success': '✓', 'info': 'i', 'warning':
+  '!', 'danger': '×' }.get(alert_type, 'i') %}
+
+  <div
+    class="alert alert-{{ alert_type }} alert-dismissible fade show rounded-4 shadow-sm border-0"
+    role="{{ 'alert' if alert_type in ['warning', 'danger'] else 'status' }}"
+  >
+    <div class="d-flex gap-3 align-items-start">
+      <span class="alert-dot mt-1 flex-shrink-0" aria-hidden="true"
+        >{{ alert_icon }}</span
+      >
+      <div class="pe-3">
+        <div class="fw-semibold mb-1">{{ alert_title }}</div>
+        <div>{{ message }}</div>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Fechar mensagem"
+    ></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %} {% endwith %}

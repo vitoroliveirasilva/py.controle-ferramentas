@@ -1,0 +1,205 @@
+{% extends "base.html" %} {% block title %}Auditoria • {{ project_name }}{%
+endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Auditoria</p>
+    <h1 class="h3 fw-bold mb-1">Logs de auditoria</h1>
+    <p class="text-muted mb-0">
+      Consulte eventos sensíveis registrados pelo sistema, com filtros por ação,
+      entidade, resultado e usuário.
+    </p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <span class="badge text-bg-light border">
+      {{ page.items|length }} registro{% if page.items|length != 1 %}s{% endif
+      %} nesta página
+    </span>
+  </div>
+</div>
+
+<form
+  class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4"
+  method="get"
+  aria-label="Filtros de auditoria"
+>
+  <div
+    class="d-flex flex-column flex-lg-row justify-content-between gap-2 mb-3"
+  >
+    <div>
+      <h2 class="h6 fw-bold mb-1">Filtros</h2>
+      <p class="text-muted small mb-0">
+        Use os campos abaixo para localizar rapidamente um evento específico.
+      </p>
+    </div>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('audit.index') }}"
+        >Limpar filtros</a
+      >
+      <button class="btn btn-primary" type="submit">Filtrar logs</button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <label class="form-label" for="audit-q">Busca geral</label>
+      <input
+        id="audit-q"
+        class="form-control"
+        name="q"
+        value="{{ search or '' }}"
+        placeholder="Ex.: usuário, IP, correlação ou motivo"
+        autocomplete="off"
+      />
+    </div>
+    <div class="col-12 col-sm-6 col-lg-2">
+      <label class="form-label" for="audit-action">Ação</label>
+      <input
+        id="audit-action"
+        class="form-control"
+        name="action"
+        value="{{ action or '' }}"
+        placeholder="Ex.: CREATE"
+        autocomplete="off"
+      />
+    </div>
+    <div class="col-12 col-sm-6 col-lg-2">
+      <label class="form-label" for="audit-entity">Entidade</label>
+      <input
+        id="audit-entity"
+        class="form-control"
+        name="entity"
+        value="{{ entity or '' }}"
+        placeholder="Ex.: Ferramenta"
+        autocomplete="off"
+      />
+    </div>
+    <div class="col-12 col-sm-6 col-lg-2">
+      <label class="form-label" for="audit-result">Resultado</label>
+      <input
+        id="audit-result"
+        class="form-control"
+        name="result"
+        value="{{ result or '' }}"
+        placeholder="Ex.: sucesso"
+        autocomplete="off"
+      />
+    </div>
+    <div class="col-12 col-sm-6 col-lg-2">
+      <label class="form-label" for="audit-user-email">Usuário</label>
+      <input
+        id="audit-user-email"
+        class="form-control"
+        name="user_email"
+        value="{{ user_email or '' }}"
+        placeholder="email@empresa.com.br"
+        autocomplete="off"
+        inputmode="email"
+      />
+    </div>
+  </div>
+</form>
+
+<section
+  class="card rounded-4 border shadow-sm overflow-hidden"
+  aria-labelledby="audit-table-title"
+>
+  <div class="card-body border-bottom py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+      <div>
+        <h2 id="audit-table-title" class="h6 fw-bold mb-1">Resultados</h2>
+        <p class="text-muted small mb-0">
+          Os registros mais relevantes aparecem conforme os filtros aplicados.
+        </p>
+      </div>
+      <span class="text-muted small align-self-md-center">
+        Toque em “Ver detalhes” para consultar o registro completo.
+      </span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table
+      class="table responsive-table align-middle mb-0"
+      data-enhanced-table="true"
+    >
+      <thead>
+        <tr>
+          <th scope="col">Quando</th>
+          <th scope="col">Ação</th>
+          <th scope="col">Entidade</th>
+          <th scope="col">Usuário</th>
+          <th scope="col">Resultado</th>
+          <th scope="col" class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in page.items %} {% set resultado_lower = (log.resultado or
+        '')|lower %}
+        <tr>
+          <td class="small text-muted" data-label="Quando">
+            {{ log.occurred_at or log.created_at }}
+          </td>
+          <td data-label="Ação">
+            <code>{{ log.acao }}</code>
+          </td>
+          <td data-label="Entidade">
+            <span class="fw-semibold">{{ log.entidade or '-' }}</span>
+            {% if log.entidade_id %}
+            <span class="text-muted">#{{ log.entidade_id }}</span>
+            {% endif %}
+          </td>
+          <td class="text-break" data-label="Usuário">
+            {{ log.usuario_email or '-' }}
+          </td>
+          <td data-label="Resultado">
+            {% if resultado_lower in ['sucesso', 'success', 'ok', 'permitido',
+            'concluido', 'concluído'] %}
+            <span class="badge text-bg-success">{{ log.resultado }}</span>
+            {% elif 'erro' in resultado_lower or 'falha' in resultado_lower or
+            'negado' in resultado_lower %}
+            <span class="badge text-bg-danger">{{ log.resultado }}</span>
+            {% elif 'alert' in resultado_lower or 'atenção' in resultado_lower
+            or 'warning' in resultado_lower %}
+            <span class="badge text-bg-warning">{{ log.resultado }}</span>
+            {% else %}
+            <span class="badge text-bg-secondary"
+              >{{ log.resultado or '-' }}</span
+            >
+            {% endif %}
+          </td>
+          <td class="text-end" data-label="Ações">
+            <a
+              class="btn btn-outline-primary btn-sm"
+              href="{{ url_for('audit.detail', audit_log_id=log.id_audit_log) }}"
+              aria-label="Ver detalhes do log {{ log.id_audit_log }}"
+            >
+              Ver detalhes
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-5">
+            <div class="mx-auto" style="max-width: 32rem">
+              <p class="h6 fw-bold mb-2">Nenhum log encontrado</p>
+              <p class="text-muted mb-3">
+                Ajuste os filtros ou limpe a busca para visualizar todos os
+                registros disponíveis.
+              </p>
+              <a
+                class="btn btn-outline-secondary btn-sm"
+                href="{{ url_for('audit.index') }}"
+              >
+                Limpar filtros
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

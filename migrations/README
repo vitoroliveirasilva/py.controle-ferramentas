@@ -1,0 +1,13 @@
+# Migrations
+
+Diretório de migrations Alembic/Flask-Migrate do Sistema de Controle de Ferramentas.
+
+Comandos principais:
+
+```bash
+flask --app manage.py db upgrade
+flask --app manage.py db migrate -m "descricao da migration"
+flask --app manage.py db downgrade
+```
+
+Não execute `flask db init`, pois o diretório já está versionado.

@@ -1,0 +1,231 @@
+{% extends "base.html" %} {% block title %}{{ occurrence.codigo }} • {{
+project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-4"
+>
+  <div>
+    <a
+      class="btn btn-outline-secondary btn-sm mb-3"
+      href="{{ url_for('occurrences.index') }}"
+    >
+      Voltar para ocorrências
+    </a>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Ocorrência</p>
+    <h1 class="h3 fw-bold mb-1"><code>{{ occurrence.codigo }}</code></h1>
+    <p class="text-muted mb-0">
+      {{ occurrence.tool.codigo_interno }} - {{ occurrence.tool.nome }}
+    </p>
+  </div>
+  <span class="badge text-bg-secondary fs-6"
+    >{{ occurrence.status|replace('_', ' ') }}</span
+  >
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <section class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4">
+      <div
+        class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+      >
+        <div>
+          <h2 class="h5 mb-1">Detalhes da ocorrência</h2>
+          <p class="text-muted small mb-0">
+            Informações registradas no momento do fato.
+          </p>
+        </div>
+        {% if occurrence.impacto_patrimonial %}
+        <span class="badge text-bg-warning align-self-start"
+          >Impacto patrimonial</span
+        >
+        {% endif %}
+      </div>
+
+      <dl class="row mb-0">
+        <dt class="col-sm-4">Tipo</dt>
+        <dd class="col-sm-8">
+          {{ occurrence.tipo_ocorrencia|replace('_', ' ') }}
+        </dd>
+
+        <dt class="col-sm-4">Motivo</dt>
+        <dd class="col-sm-8">{{ occurrence.motivo }}</dd>
+
+        <dt class="col-sm-4">Descrição</dt>
+        <dd class="col-sm-8">{{ occurrence.descricao }}</dd>
+
+        <dt class="col-sm-4">Responsável no fato</dt>
+        <dd class="col-sm-8">
+          {{ occurrence.responsavel_atual_snapshot or '-' }}
+        </dd>
+
+        <dt class="col-sm-4">Ativo imobilizado</dt>
+        <dd class="col-sm-8">
+          {{ occurrence.ativo_imobilizado_snapshot or '-' }}
+        </dd>
+
+        <dt class="col-sm-4">Impacto patrimonial</dt>
+        <dd class="col-sm-8">
+          {{ 'Sim' if occurrence.impacto_patrimonial else 'Não' }}
+        </dd>
+
+        <dt class="col-sm-4">Registrado por</dt>
+        <dd class="col-sm-8">{{ occurrence.registrante_email or '-' }}</dd>
+      </dl>
+    </section>
+
+    <section class="card rounded-4 border shadow-sm p-3 p-lg-4">
+      <div class="mb-3">
+        <h2 class="h5 mb-1">Anexos e fotos</h2>
+        <p class="text-muted small mb-0">
+          Inclua evidências relevantes, como fotos, PDFs ou comprovantes.
+        </p>
+      </div>
+
+      {% if can('occurrences.create') %}
+      <form
+        method="post"
+        enctype="multipart/form-data"
+        action="{{ url_for('occurrences.upload_attachment', occurrence_id=occurrence.id_occurrence) }}"
+        class="row g-2 align-items-end mb-3"
+      >
+        {{ attachment_form.hidden_tag() }}
+        <div class="col-md-5">
+          <label class="form-label small">Arquivo</label>
+          {{ attachment_form.arquivo(class='form-control') }}
+        </div>
+        <div class="col-md-5">
+          <label class="form-label small">Descrição</label>
+          {{ attachment_form.descricao(class='form-control',
+          placeholder='Descrição opcional') }}
+        </div>
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-outline-primary" type="submit">Enviar</button>
+        </div>
+      </form>
+      {% endif %}
+
+      <div class="list-group list-group-flush">
+        {% for attachment in attachments %}
+        <div
+          class="list-group-item px-0 d-flex flex-column flex-md-row justify-content-between gap-3"
+        >
+          <div>
+            <div class="fw-semibold">{{ attachment.filename_original }}</div>
+            <div class="small text-muted">
+              {{ attachment.content_type or '-' }} • {{ attachment.tamanho_bytes
+              }} bytes{% if attachment.descricao %} • {{ attachment.descricao
+              }}{% endif %}
+            </div>
+          </div>
+          <a
+            class="btn btn-outline-secondary btn-sm align-self-md-center"
+            href="{{ url_for('occurrences.download_attachment', attachment_id=attachment.id_attachment) }}"
+          >
+            Baixar
+          </a>
+        </div>
+        {% else %}
+        <div class="text-muted small">Nenhum anexo incluído.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="vstack gap-3">
+      {% if can('occurrences.resolve') and occurrence.status in ['aberta',
+      'aguardando_aprovacao'] %}
+      <section class="card rounded-4 border shadow-sm p-3 p-lg-4">
+        <h2 class="h6 mb-1">Colocar em análise</h2>
+        <p class="text-muted small">
+          Use quando a ocorrência precisa de verificação antes da decisão.
+        </p>
+        <form
+          method="post"
+          action="{{ url_for('occurrences.analyze', occurrence_id=occurrence.id_occurrence) }}"
+        >
+          {{ decision_form.hidden_tag() }} {{
+          decision_form.motivo(class='form-control mb-2', rows=3,
+          placeholder='Motivo') }}
+          <button class="btn btn-outline-primary w-100" type="submit">
+            Em análise
+          </button>
+        </form>
+      </section>
+      {% endif %} {% if can('occurrences.approve') and occurrence.status in
+      ['aberta', 'em_analise', 'aguardando_aprovacao'] %}
+      <section class="card rounded-4 border shadow-sm p-3 p-lg-4">
+        <h2 class="h6 mb-1">Aprovar</h2>
+        <p class="text-muted small">
+          Aprova a ocorrência para seguir o fluxo definido.
+        </p>
+        <form
+          method="post"
+          action="{{ url_for('occurrences.approve', occurrence_id=occurrence.id_occurrence) }}"
+        >
+          {{ decision_form.hidden_tag() }} {{
+          decision_form.motivo(class='form-control mb-2', rows=3,
+          placeholder='Motivo da aprovação') }}
+          <button class="btn btn-success w-100" type="submit">Aprovar</button>
+        </form>
+      </section>
+      {% endif %} {% if can('occurrences.reject') and occurrence.status in
+      ['aberta', 'em_analise', 'aguardando_aprovacao'] %}
+      <section class="card rounded-4 border shadow-sm p-3 p-lg-4">
+        <h2 class="h6 mb-1">Recusar</h2>
+        <p class="text-muted small">
+          Registre claramente por que a ocorrência não será aprovada.
+        </p>
+        <form
+          method="post"
+          action="{{ url_for('occurrences.reject', occurrence_id=occurrence.id_occurrence) }}"
+        >
+          {{ decision_form.hidden_tag() }} {{
+          decision_form.motivo(class='form-control mb-2', rows=3,
+          placeholder='Motivo da recusa') }}
+          <button class="btn btn-outline-danger w-100" type="submit">
+            Recusar
+          </button>
+        </form>
+      </section>
+      {% endif %} {% if can('occurrences.resolve') and occurrence.status in
+      ['aberta', 'em_analise', 'aprovada'] %}
+      <section class="card rounded-4 border shadow-sm p-3 p-lg-4">
+        <h2 class="h6 mb-1">Resolver</h2>
+        <p class="text-muted small">
+          Informe a ação tomada para encerrar a ocorrência.
+        </p>
+        <form
+          method="post"
+          action="{{ url_for('occurrences.resolve', occurrence_id=occurrence.id_occurrence) }}"
+        >
+          {{ resolve_form.hidden_tag() }} {{
+          resolve_form.observacoes_resolucao(class='form-control mb-2', rows=3,
+          placeholder='Como foi resolvido?') }}
+          <button class="btn btn-primary w-100" type="submit">Resolver</button>
+        </form>
+      </section>
+      {% endif %} {% if can('occurrences.resolve') and occurrence.status not in
+      ['resolvida', 'cancelada'] %}
+      <section class="card rounded-4 border shadow-sm p-3 p-lg-4">
+        <h2 class="h6 mb-1">Cancelar</h2>
+        <p class="text-muted small">
+          Use apenas quando a ocorrência não deve seguir o fluxo.
+        </p>
+        <form
+          method="post"
+          action="{{ url_for('occurrences.cancel', occurrence_id=occurrence.id_occurrence) }}"
+        >
+          {{ decision_form.hidden_tag() }} {{
+          decision_form.motivo(class='form-control mb-2', rows=3,
+          placeholder='Motivo do cancelamento') }}
+          <button class="btn btn-outline-secondary w-100" type="submit">
+            Cancelar
+          </button>
+        </form>
+      </section>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% include 'components/signatures_card.html' %} {% endblock %}

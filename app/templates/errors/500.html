@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% set error_code = "500" %}
+{% set error_label = "Erro interno" %}
+{% set error_title = message|default("O sistema encontrou um erro inesperado.", true) %}
+{% set error_description = "A solicitação não pôde ser concluída por uma falha interna. Nenhum detalhe técnico sensível é exibido por segurança." %}
+{% set error_hint = "Tente novamente. Se o erro continuar, registre o horário, o que estava fazendo e acione o suporte." %}
+
+{% block title %}Erro 500 • {{ project_name }}{% endblock %}
+
+{% block content %}
+  {% include "errors/_error_page.html" %}
+{% endblock %}

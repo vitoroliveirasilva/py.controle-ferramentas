@@ -1,0 +1,139 @@
+{% extends "base.html" %} {% block title %}Ferramentas • {{ project_name }}{%
+endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Cadastros</p>
+    <h1 class="h3 fw-bold mb-1">Ferramentas</h1>
+    <p class="text-muted mb-0">
+      Consulte, cadastre e acesse as ações operacionais de cada ferramenta.
+    </p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('tools.lookup') }}"
+      >Leitura / QR</a
+    >
+    {% if can('tools.create') %}
+    <a class="btn btn-primary" href="{{ url_for('tools.create') }}"
+      >Nova ferramenta</a
+    >
+    {% endif %}
+  </div>
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 mb-4" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-lg-5">
+      <label class="form-label" for="tools-search">Busca</label>
+      <input
+        id="tools-search"
+        class="form-control"
+        name="q"
+        value="{{ search }}"
+        placeholder="Código, ativo, série ou nome"
+      />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="tools-status">Status</label>
+      <select id="tools-status" class="form-select" name="status">
+        <option value="">Todos os status</option>
+        {% for value, label in statuses %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>
+          {{ label }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="tools-category">Categoria</label>
+      <select id="tools-category" class="form-select" name="categoria">
+        <option value="">Todas as categorias</option>
+        {% for category in categories %}
+        <option
+          value="{{ category.id_categoria }}"
+          {% if category_id == category.id_categoria %}selected{% endif %}
+        >
+          {{ category.nome }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-1 d-grid">
+      <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<div class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Ferramenta</th>
+          <th>Categoria</th>
+          <th>Status</th>
+          <th>Ativo</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tool in page.items %}
+        <tr>
+          <td data-label="Código"><code>{{ tool.codigo_interno }}</code></td>
+          <td data-label="Ferramenta">
+            <div class="fw-semibold">{{ tool.nome }}</div>
+            <div class="small text-muted">
+              {{ tool.marca or '' }} {{ tool.modelo or '' }}
+            </div>
+          </td>
+          <td data-label="Categoria">
+            {{ tool.categoria.nome if tool.categoria else '-' }}
+          </td>
+          <td data-label="Status">
+            <span class="badge text-bg-info">{{ tool.status }}</span>
+          </td>
+          <td data-label="Ativo">{{ tool.ativo_imobilizado or '-' }}</td>
+          <td data-label="Ações" class="text-end">
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+              {% if can('custody.view') %}
+              <a
+                class="btn btn-sm btn-outline-secondary"
+                href="{{ url_for('custody.detail', tool_id=tool.id_tool) }}"
+                >Custódia</a
+              >
+              {% endif %} {% if can('transfers.create') %}
+              <a
+                class="btn btn-sm btn-outline-success"
+                href="{{ url_for('transfers.create') }}"
+                >Transferir</a
+              >
+              {% endif %}
+              <a
+                class="btn btn-sm btn-outline-dark"
+                href="{{ url_for('tools.qr_label', tool_id=tool.id_tool) }}"
+                >QR</a
+              >
+              {% if can('tools.update') %}
+              <a
+                class="btn btn-sm btn-outline-primary"
+                href="{{ url_for('tools.edit', tool_id=tool.id_tool) }}"
+                >Editar</a
+              >
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-5">
+            Nenhuma ferramenta encontrada com os filtros informados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "components/pagination.html" %} {% endblock %}

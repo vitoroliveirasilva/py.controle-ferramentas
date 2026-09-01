@@ -1,0 +1,225 @@
+{% extends "base.html" %} {% block title %}Transferência {{ transfer.codigo }} •
+{{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">
+      Transferência
+    </p>
+    <h1 class="h3 fw-bold mb-1"><code>{{ transfer.codigo }}</code></h1>
+    <p class="text-muted mb-0">
+      Confirmação, rastreabilidade e histórico dos itens movimentados.
+    </p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('transfers.index') }}"
+      >Voltar</a
+    >
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <section class="card rounded-4 border shadow-sm h-100">
+      <div class="card-body p-4">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+        >
+          <div>
+            <h2 class="h5 fw-semibold mb-1">Resumo da transferência</h2>
+            <p class="text-muted small mb-0">
+              Dados principais da solicitação.
+            </p>
+          </div>
+          <span class="badge text-bg-info align-self-start"
+            >{{ transfer.status }}</span
+          >
+        </div>
+
+        <dl class="row mb-0 detail-list">
+          <dt class="col-sm-4 col-md-3">Tipo</dt>
+          <dd class="col-sm-8 col-md-9">{{ transfer.tipo_transferencia }}</dd>
+
+          <dt class="col-sm-4 col-md-3">Destino</dt>
+          <dd class="col-sm-8 col-md-9">
+            <div class="fw-semibold">
+              {{ transfer.destino_responsavel_snapshot or '-' }}
+            </div>
+            <div class="small text-muted">
+              {{ transfer.destino_local_snapshot or
+              transfer.destino_tipo_custodia or '-' }}
+            </div>
+          </dd>
+
+          <dt class="col-sm-4 col-md-3">Motivo</dt>
+          <dd class="col-sm-8 col-md-9">{{ transfer.motivo }}</dd>
+
+          <dt class="col-sm-4 col-md-3">Observações</dt>
+          <dd class="col-sm-8 col-md-9">{{ transfer.observacoes or '-' }}</dd>
+
+          <dt class="col-sm-4 col-md-3">Solicitada em</dt>
+          <dd class="col-sm-8 col-md-9">
+            {{ transfer.solicitado_em.strftime('%d/%m/%Y %H:%M') if
+            transfer.solicitado_em else '-' }}
+          </dd>
+        </dl>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-4">
+    <aside class="card rounded-4 border shadow-sm h-100">
+      <div class="card-body p-4">
+        <h2 class="h5 fw-semibold mb-1">Ações disponíveis</h2>
+        <p class="text-muted small mb-3">
+          Use a ação correspondente ao estado atual da transferência.
+        </p>
+
+        {% if transfer.status == 'aguardando_confirmacao_origem' and
+        can('transfers.confirm_origin') %}
+        <form
+          method="post"
+          action="{{ url_for('transfers.confirm_origin_route', transfer_id=transfer.id_transfer) }}"
+          class="border rounded-4 p-3 mb-3"
+        >
+          {{ decision_form.hidden_tag() }}
+          <label class="form-label" for="{{ decision_form.motivo.id }}"
+            >Observação</label
+          >
+          {{ decision_form.motivo(class='form-control mb-2', rows=2,
+          placeholder='Observação opcional sobre a origem') }}
+          <button class="btn btn-success w-100" type="submit">
+            Confirmar origem
+          </button>
+        </form>
+        {% endif %} {% if transfer.status == 'aguardando_confirmacao_destino'
+        and can('transfers.confirm_destination') %}
+        <form
+          method="post"
+          action="{{ url_for('transfers.confirm_destination_route', transfer_id=transfer.id_transfer) }}"
+          class="border rounded-4 p-3 mb-3"
+        >
+          {{ decision_form.hidden_tag() }}
+          <label class="form-label" for="{{ decision_form.motivo.id }}"
+            >Observação</label
+          >
+          {{ decision_form.motivo(class='form-control mb-2', rows=2,
+          placeholder='Observação opcional sobre o recebimento') }}
+          <button class="btn btn-success w-100" type="submit">
+            Confirmar destino
+          </button>
+        </form>
+        {% endif %} {% if transfer.status in ['aguardando_confirmacao_origem',
+        'aguardando_confirmacao_destino'] and can('transfers.refuse') %}
+        <form
+          method="post"
+          action="{{ url_for('transfers.refuse_route', transfer_id=transfer.id_transfer) }}"
+          class="border rounded-4 p-3 mb-3"
+        >
+          {{ decision_form.hidden_tag() }}
+          <label class="form-label" for="{{ decision_form.motivo.id }}"
+            >Motivo da recusa</label
+          >
+          {{ decision_form.motivo(class='form-control mb-2', rows=2,
+          required=True, placeholder='Informe o motivo da recusa') }}
+          <button class="btn btn-outline-danger w-100" type="submit">
+            Recusar transferência
+          </button>
+        </form>
+        {% endif %} {% if transfer.status not in ['concluida', 'recusada',
+        'cancelada', 'expirada'] and can('transfers.cancel') %}
+        <form
+          method="post"
+          action="{{ url_for('transfers.cancel_route', transfer_id=transfer.id_transfer) }}"
+          class="border rounded-4 p-3 mb-3"
+        >
+          {{ decision_form.hidden_tag() }}
+          <label class="form-label" for="{{ decision_form.motivo.id }}"
+            >Motivo do cancelamento</label
+          >
+          {{ decision_form.motivo(class='form-control mb-2', rows=2,
+          required=True, placeholder='Explique o motivo do cancelamento') }}
+          <button class="btn btn-outline-secondary w-100" type="submit">
+            Cancelar transferência
+          </button>
+        </form>
+        {% endif %} {% if transfer.status in ['aguardando_confirmacao_origem',
+        'aguardando_confirmacao_destino'] and can('transfers.override') %}
+        <form
+          method="post"
+          action="{{ url_for('transfers.expire_route', transfer_id=transfer.id_transfer) }}"
+          class="border rounded-4 p-3"
+        >
+          {{ decision_form.hidden_tag() }}
+          <label class="form-label" for="{{ decision_form.motivo.id }}"
+            >Motivo da expiração</label
+          >
+          {{ decision_form.motivo(class='form-control mb-2', rows=2,
+          placeholder='Informe o motivo da expiração') }}
+          <button class="btn btn-outline-warning w-100" type="submit">
+            Expirar transferência
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+</div>
+
+<section class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="card-header bg-transparent border-0 px-4 pt-4 pb-2">
+    <h2 class="h5 fw-semibold mb-1">Itens da transferência</h2>
+    <p class="text-muted small mb-0">
+      Ferramentas incluídas e situação individual de cada item.
+    </p>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Ferramenta</th>
+          <th>Status item</th>
+          <th>Origem</th>
+          <th>Status anterior</th>
+          <th>Concluído em</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td data-label="Ferramenta">
+            <code>{{ item.tool.codigo_interno }}</code>
+            <div class="small text-muted">{{ item.tool.nome }}</div>
+          </td>
+          <td data-label="Status item">
+            <span class="badge text-bg-light border">{{ item.status }}</span>
+          </td>
+          <td data-label="Origem">
+            {{ item.origem_responsavel_snapshot or '-' }}
+            <div class="small text-muted">
+              {{ item.origem_local_snapshot or item.origem_tipo_custodia or '-'
+              }}
+            </div>
+          </td>
+          <td data-label="Status anterior">
+            {{ item.status_ferramenta_anterior or '-' }}
+          </td>
+          <td data-label="Concluído em">
+            {{ item.concluido_em.strftime('%d/%m/%Y %H:%M') if item.concluido_em
+            else '-' }}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-5">
+            Nenhum item nesta transferência.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include 'components/signatures_card.html' %} {% endblock %}

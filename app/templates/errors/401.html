@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% set error_code = "401" %}
+{% set error_label = "Acesso não autenticado" %}
+{% set error_title = message|default("Sua sessão não foi identificada.", true) %}
+{% set error_description = "Para continuar, é necessário estar autenticado no sistema com uma conta autorizada." %}
+{% set error_hint = "Volte ao início e faça login novamente. Se você já entrou no sistema, sua sessão pode ter expirado." %}
+
+{% block title %}Erro 401 • {{ project_name }}{% endblock %}
+
+{% block content %}
+  {% include "errors/_error_page.html" %}
+{% endblock %}

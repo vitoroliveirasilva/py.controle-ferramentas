@@ -1,0 +1,129 @@
+{% extends "base.html" %} {% block title %}{{ 'Editar' if location else 'Novo'
+}} local • {{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Cadastros</p>
+    <h1 class="h3 fw-bold mb-1">
+      {{ 'Editar local' if location else 'Novo local' }}
+    </h1>
+    <p class="text-muted mb-0">
+      Cadastre filiais, oficinas, sites, almoxarifados ou demais pontos físicos
+      usados na custódia de ferramentas.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('locations.index') }}"
+    >Voltar</a
+  >
+</div>
+
+<form
+  method="post"
+  novalidate
+  class="card rounded-4 border shadow-sm overflow-hidden"
+>
+  {{ form.hidden_tag() }}
+
+  <div class="card-body p-4 p-lg-5">
+    <div class="row g-4">
+      <div class="col-12">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between gap-2 align-items-md-center pb-3 border-bottom"
+        >
+          <div>
+            <h2 class="h5 fw-semibold mb-1">Identificação do local</h2>
+            <p class="text-muted small mb-0">
+              Use nomes claros para facilitar a busca por usuários operacionais.
+            </p>
+          </div>
+          <span
+            class="badge text-bg-{{ 'success' if location and location.ativo else 'secondary' }} align-self-start align-self-md-center"
+          >
+            {{ 'Local ativo' if not location or location.ativo else 'Local
+            inativo' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        {{ form.codigo.label(class='form-label fw-semibold') }} {{
+        form.codigo(class='form-control', placeholder='Ex.: JDI-OFI') }}
+        <div class="form-text">Código curto usado em filtros e relatórios.</div>
+      </div>
+
+      <div class="col-md-5">
+        {{ form.nome.label(class='form-label fw-semibold') }} {{
+        form.nome(class='form-control', placeholder='Ex.: Oficina Jundiaí') }}
+      </div>
+
+      <div class="col-md-4">
+        {{ form.tipo_local.label(class='form-label fw-semibold') }} {{
+        form.tipo_local(class='form-select') }}
+      </div>
+
+      <div class="col-md-4">
+        {{ form.filial.label(class='form-label') }} {{
+        form.filial(class='form-control', placeholder='Ex.: Jundiaí') }}
+      </div>
+
+      <div class="col-md-4">
+        {{ form.departamento.label(class='form-label') }} {{
+        form.departamento(class='form-control', placeholder='Ex.: Pós-venda') }}
+      </div>
+
+      <div class="col-md-4">
+        {{ form.responsavel_nome.label(class='form-label') }} {{
+        form.responsavel_nome(class='form-control', placeholder='Nome do
+        responsável local') }}
+      </div>
+
+      <div class="col-12">
+        {{ form.endereco.label(class='form-label') }} {{
+        form.endereco(class='form-control', rows=2, placeholder='Endereço ou
+        referência interna do local') }}
+      </div>
+
+      <div class="col-12">
+        {{ form.observacoes.label(class='form-label') }} {{
+        form.observacoes(class='form-control', rows=2, placeholder='Observações
+        úteis para operação, acesso ou identificação') }}
+      </div>
+
+      <div class="col-12">
+        <div
+          class="form-check form-switch rounded-4 border p-3 ps-5 bg-body-tertiary"
+        >
+          {{ form.ativo(class='form-check-input', role='switch') }} {{
+          form.ativo.label(class='form-check-label fw-semibold') }}
+          <div class="form-text mb-0">
+            Locais inativos continuam no histórico, mas não devem ser usados em
+            novas movimentações.
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        {{ form.motivo.label(class='form-label fw-semibold') }} {{
+        form.motivo(class='form-control', rows=2, placeholder='Informe o motivo
+        da criação ou alteração crítica') }}
+        <div class="form-text">
+          Obrigatório em alterações de código, tipo, filial, departamento ou
+          status.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer bg-body-tertiary border-top p-3 p-lg-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+      <a
+        class="btn btn-outline-secondary"
+        href="{{ url_for('locations.index') }}"
+        >Cancelar</a
+      >
+      <button class="btn btn-primary" type="submit">Salvar local</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

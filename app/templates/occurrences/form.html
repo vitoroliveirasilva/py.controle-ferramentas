@@ -1,0 +1,70 @@
+{% extends "base.html" %} {% block title %}Nova ocorrência • {{ project_name
+}}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Ocorrências</p>
+    <h1 class="h3 fw-bold mb-1">Nova ocorrência</h1>
+    <p class="text-muted mb-0">
+      Registre perda, dano, baixa, manutenção, calibração ou regularização.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('occurrences.index') }}"
+    >Voltar</a
+  >
+</div>
+
+<form method="post" class="card rounded-4 border shadow-sm p-3 p-lg-4">
+  {{ form.hidden_tag() }}
+
+  <div class="alert alert-info rounded-4 mb-4" role="alert">
+    Descreva o fato com objetividade. Quanto mais clara a ocorrência, mais
+    rápido será o tratamento.
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      {{ form.codigo_ferramenta.label(class='form-label') }} {{
+      form.codigo_ferramenta(class='form-control', placeholder='Ex.: FERR-001')
+      }}
+      <div class="form-text">
+        Informe o código interno, ativo ou identificador conhecido.
+      </div>
+    </div>
+    <div class="col-md-4">
+      {{ form.tipo_ocorrencia.label(class='form-label') }} {{
+      form.tipo_ocorrencia(class='form-select') }}
+    </div>
+    <div class="col-md-4">
+      {{ form.fato_em.label(class='form-label') }} {{
+      form.fato_em(class='form-control') }}
+    </div>
+    <div class="col-12">
+      {{ form.motivo.label(class='form-label') }} {{
+      form.motivo(class='form-control', placeholder='Resumo objetivo do motivo')
+      }}
+    </div>
+    <div class="col-12">
+      {{ form.descricao.label(class='form-label') }} {{
+      form.descricao(class='form-control', rows=6, placeholder='Descreva o fato,
+      condição encontrada, responsável no momento e evidências disponíveis') }}
+      <div class="form-text">
+        Inclua local, data aproximada, responsável envolvido e evidências
+        existentes.
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4"
+  >
+    <a
+      class="btn btn-outline-secondary"
+      href="{{ url_for('occurrences.index') }}"
+      >Cancelar</a
+    >
+    {{ form.submit(class='btn btn-primary') }}
+  </div>
+</form>
+{% endblock %}

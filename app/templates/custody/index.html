@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Custódias atuais • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center mb-4">
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Custódia</p>
+    <h1 class="h3 fw-bold mb-1">Custódias atuais</h1>
+    <p class="text-muted mb-0">Veja quem está responsável por cada ferramenta ativa.</p>
+  </div>
+  <a class="btn btn-outline-warning" href="{{ url_for('custody.missing') }}">Ferramentas sem custódia</a>
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 mb-4" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label" for="custodySearch">Busca</label>
+      <input id="custodySearch" class="form-control" name="q" value="{{ search }}" placeholder="Ferramenta, responsável, local, ativo ou série">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="custodyType">Tipo</label>
+      <select id="custodyType" class="form-select" name="tipo">
+        <option value="">Todos os tipos</option>
+        {% for value, label in custody_types %}
+        <option value="{{ value }}" {{ 'selected' if custody_type == value }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-primary w-100" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<section class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Ferramenta</th>
+          <th>Tipo</th>
+          <th>Responsável</th>
+          <th>Local</th>
+          <th>Desde</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for custody in page.items %}
+        <tr>
+          <td data-label="Ferramenta">
+            <code>{{ custody.tool.codigo_interno }}</code>
+            <div class="small text-muted">{{ custody.tool.nome }}</div>
+          </td>
+          <td data-label="Tipo"><span class="badge text-bg-primary">{{ custody.tipo_custodia }}</span></td>
+          <td data-label="Responsável">{{ custody.responsavel_snapshot or '-' }}</td>
+          <td data-label="Local">{{ custody.local_snapshot or '-' }}</td>
+          <td data-label="Desde">{{ custody.inicio_em.strftime('%d/%m/%Y %H:%M') if custody.inicio_em else '-' }}</td>
+          <td data-label="Ações" class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('custody.detail', tool_id=custody.id_tool) }}">Linha do tempo</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-5">Nenhuma custódia atual encontrada.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "components/pagination.html" %}
+{% endblock %}

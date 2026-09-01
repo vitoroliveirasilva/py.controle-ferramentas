@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ definition.title }}</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --text: #172033;
+        --muted: #5f6b7a;
+        --border: #d8dee9;
+        --soft: #f6f8fb;
+        --head: #eef3f8;
+        --accent: #1f4f82;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: Arial, sans-serif;
+        color: var(--text);
+        background: #ffffff;
+      }
+
+      .print-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--soft);
+      }
+
+      .print-button {
+        border: 1px solid var(--accent);
+        border-radius: 10px;
+        background: var(--accent);
+        color: #ffffff;
+        padding: 8px 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .report-header {
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--border);
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: 24px;
+        line-height: 1.2;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .meta {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 7px 8px;
+        text-align: left;
+        vertical-align: top;
+        word-break: break-word;
+      }
+
+      th {
+        background: var(--head);
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      tbody tr:nth-child(even) td {
+        background: #fbfcfe;
+      }
+
+      .empty-state {
+        padding: 18px;
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @page {
+        margin: 14mm;
+      }
+
+      @media print {
+        body {
+          padding: 0;
+        }
+
+        .no-print {
+          display: none !important;
+        }
+
+        .report-header {
+          break-after: avoid;
+        }
+
+        table {
+          page-break-inside: auto;
+        }
+
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+
+        thead {
+          display: table-header-group;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="print-toolbar no-print">
+      <div>
+        <strong>{{ definition.title }}</strong>
+        <div class="meta">
+          Revise os dados antes de imprimir ou salvar como PDF.
+        </div>
+      </div>
+      <button class="print-button" type="button" onclick="window.print()">
+        Imprimir / salvar PDF
+      </button>
+    </div>
+
+    <header class="report-header">
+      <h1>{{ definition.title }}</h1>
+      <p>{{ definition.description }}</p>
+      <div class="meta">
+        Total exibido: {{ rows|length }} registro{{ '' if rows|length == 1 else
+        's' }}
+      </div>
+    </header>
+
+    {% if rows %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            {% for key in rows[0].keys() %}
+            <th>{{ key|replace('_', ' ')|title }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            {% for value in row.values() %}
+            <td>{{ value or '-' }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      Nenhum registro encontrado para os filtros informados.
+    </div>
+    {% endif %}
+  </body>
+</html>

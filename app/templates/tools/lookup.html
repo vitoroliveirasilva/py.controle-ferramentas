@@ -1,0 +1,108 @@
+{% extends "base.html" %} {% block title %}Leitura de ferramenta • {{
+project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">
+      Operação em campo
+    </p>
+    <h1 class="h3 fw-bold mb-1">Leitura de ferramenta</h1>
+    <p class="text-muted mb-0">
+      Leia o QR Code/código de barras ou digite código interno, ativo ou série.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('tools.index') }}"
+    >Voltar</a
+  >
+</div>
+
+<section class="card rounded-4 border shadow-sm p-4 mb-4 mobile-action-card">
+  <form method="post" class="row g-3 align-items-end">
+    {{ form.hidden_tag() }}
+    <div class="col-lg-10">
+      {{ form.codigo.label(class='form-label fw-semibold') }} {{
+      form.codigo(class='form-control form-control-lg scan-input', value=code,
+      autofocus=True, inputmode='text', placeholder='Ex.: TL-001, ativo ou
+      número de série') }}
+      <div class="form-text">
+        Em coletores ou celulares, mantenha este campo focado e faça a leitura.
+      </div>
+    </div>
+    <div class="col-lg-2 d-grid">
+      <button class="btn btn-primary btn-lg" type="submit">Buscar</button>
+    </div>
+  </form>
+</section>
+
+{% if tool %}
+<section class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="row g-0">
+    <div
+      class="col-lg-4 bg-body-tertiary d-flex align-items-center justify-content-center p-3"
+    >
+      {% if tool.referencia_foto_path %}
+      <img
+        class="img-fluid rounded-4 tool-reference-photo"
+        src="{{ url_for('tools.reference_photo', tool_id=tool.id_tool) }}"
+        alt="Foto de referência de {{ tool.nome }}"
+      />
+      {% else %}
+      <div class="text-center text-muted p-4 border rounded-4 w-100">
+        Sem foto de referência cadastrada.
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-lg-8">
+      <div class="card-body p-4">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="badge text-bg-info">{{ tool.status }}</span>
+          <span class="badge text-bg-secondary">{{ tool.criticidade }}</span>
+        </div>
+        <h2 class="h4 fw-bold mb-1">{{ tool.nome }}</h2>
+        <p class="text-muted mb-4"><code>{{ tool.codigo_interno }}</code></p>
+
+        <dl class="row small mb-4">
+          <dt class="col-sm-4">Categoria</dt>
+          <dd class="col-sm-8">
+            {{ tool.categoria.nome if tool.categoria else '-' }}
+          </dd>
+          <dt class="col-sm-4">Ativo imobilizado</dt>
+          <dd class="col-sm-8">{{ tool.ativo_imobilizado or '-' }}</dd>
+          <dt class="col-sm-4">Série</dt>
+          <dd class="col-sm-8">{{ tool.numero_serie or '-' }}</dd>
+          <dt class="col-sm-4">Marca/modelo</dt>
+          <dd class="col-sm-8">
+            {{ tool.marca or '-' }} {{ tool.modelo or '' }}
+          </dd>
+        </dl>
+
+        <div class="d-flex flex-column flex-sm-row flex-wrap gap-2">
+          {% if can('custody.view') %}
+          <a
+            class="btn btn-outline-secondary"
+            href="{{ url_for('custody.detail', tool_id=tool.id_tool) }}"
+            >Ver custódia</a
+          >
+          {% endif %} {% if can('tools.update') %}
+          <a
+            class="btn btn-primary"
+            href="{{ url_for('tools.edit', tool_id=tool.id_tool) }}"
+            >Editar ferramenta</a
+          >
+          {% endif %}
+          <a
+            class="btn btn-outline-dark"
+            href="{{ url_for('tools.qr_label', tool_id=tool.id_tool) }}"
+            >Etiqueta QR</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% else %}
+<div class="alert alert-light border rounded-4 mb-0">
+  Informe ou leia um código para consultar a ferramenta.
+</div>
+{% endif %} {% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %} {% block title %}{{ signature.codigo }} • {{
+project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">
+      Assinatura interna
+    </p>
+    <h1 class="h3 fw-bold mb-1"><code>{{ signature.codigo }}</code></h1>
+    <p class="text-muted mb-0">
+      Evidência de confirmação para ação crítica registrada pelo sistema.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('signatures.index') }}"
+    >Voltar</a
+  >
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Resultado</div>
+      <div class="h5 mb-0">{{ signature.resultado }}</div>
+    </section>
+  </div>
+  <div class="col-md-4">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Método</div>
+      <div class="h5 mb-0">{{ signature.metodo }}</div>
+    </section>
+  </div>
+  <div class="col-md-4">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Data/hora</div>
+      <div class="h6 mb-0">
+        {{ signature.signed_at.strftime('%d/%m/%Y %H:%M:%S') if
+        signature.signed_at else '-' }}
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <section class="card rounded-4 border shadow-sm p-4 h-100">
+      <h2 class="h5 fw-semibold mb-3">Evidência</h2>
+      <dl class="row mb-0 detail-list">
+        <dt class="col-sm-4">Ação</dt>
+        <dd class="col-sm-8">{{ signature.acao }}</dd>
+
+        <dt class="col-sm-4">Entidade</dt>
+        <dd class="col-sm-8">
+          {{ signature.entidade }} #{{ signature.entidade_id }}
+        </dd>
+
+        <dt class="col-sm-4">Motivo</dt>
+        <dd class="col-sm-8">{{ signature.motivo or '-' }}</dd>
+
+        <dt class="col-sm-4">Correlação</dt>
+        <dd class="col-sm-8 text-break">
+          <code>{{ signature.correlation_id or '-' }}</code>
+        </dd>
+      </dl>
+    </section>
+  </div>
+
+  <div class="col-lg-5">
+    <section class="card rounded-4 border shadow-sm p-4 h-100">
+      <h2 class="h5 fw-semibold mb-3">Quem assinou</h2>
+      <dl class="mb-0 detail-list">
+        <dt>Usuário</dt>
+        <dd>
+          {{ signature.usuario_nome }}
+          <div class="small text-muted text-break">
+            {{ signature.usuario_email }}
+          </div>
+        </dd>
+
+        <dt>IP</dt>
+        <dd>{{ signature.ip or '-' }}</dd>
+
+        <dt>User-agent</dt>
+        <dd class="small text-break">{{ signature.user_agent or '-' }}</dd>
+      </dl>
+    </section>
+  </div>
+</div>
+
+{% if signature.contexto_json %}
+<section class="card rounded-4 border shadow-sm p-4 mt-4">
+  <div
+    class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+  >
+    <div>
+      <h2 class="h5 fw-semibold mb-1">Contexto da operação</h2>
+      <p class="text-muted small mb-0">
+        Dados técnicos usados para rastreabilidade e auditoria.
+      </p>
+    </div>
+  </div>
+  <pre
+    class="small bg-body-tertiary border rounded-3 p-3 mb-0 text-wrap text-break"
+  >
+{{ signature.contexto_json }}</pre
+  >
+</section>
+{% endif %} {% endblock %}

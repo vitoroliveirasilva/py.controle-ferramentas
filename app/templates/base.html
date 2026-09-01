@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Sistema corporativo para controle de inventário, custódia e histórico de ferramentas."
+    />
+    <script>
+      (() => {
+        const storageKey = "controle-ferramentas-theme";
+        try {
+          const savedTheme = localStorage.getItem(storageKey);
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          const theme =
+            savedTheme === "light" || savedTheme === "dark"
+              ? savedTheme
+              : prefersDark
+                ? "dark"
+                : "light";
+          document.documentElement.setAttribute("data-bs-theme", theme);
+        } catch (_) {
+          document.documentElement.setAttribute("data-bs-theme", "light");
+        }
+      })();
+    </script>
+    <title>{% block title %}{{ project_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ config.BOOTSTRAP_CSS_URL }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/app.css') }}"
+    />
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+    <a class="skip-link" href="#app-content">Ir para o conteúdo principal</a>
+
+    {% include "components/navbar.html" %}
+
+    <main
+      id="app-content"
+      class="app-main container-xxl py-4 py-lg-5"
+      tabindex="-1"
+    >
+      {% include "components/flash.html" %} {% block content %}{% endblock %}
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <script src="{{ config.BOOTSTRAP_JS_URL }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>

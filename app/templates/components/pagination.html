@@ -1,0 +1,97 @@
+{% if page.pages > 1 %}
+<nav class="pagination-shell mt-4" aria-label="Navegação entre páginas">
+  <div
+    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2"
+  >
+    <p class="small text-muted mb-0">
+      Página {{ page.page }} de {{ page.pages }} {% if page.total is defined %}
+      <span class="d-none d-sm-inline"
+        >• {{ page.total }} registro{{ '' if page.total == 1 else 's' }}</span
+      >
+      {% endif %}
+    </p>
+
+    <ul class="pagination pagination-sm mb-0 flex-wrap gap-1">
+      {% set first_args = request.args.to_dict() %} {% set _ =
+      first_args.update({'page': 1}) %} {% set prev_args =
+      request.args.to_dict() %} {% set _ = prev_args.update({'page':
+      page.prev_num}) %}
+
+      <li class="page-item {{ 'disabled' if page.page == 1 }}">
+        {% if page.page == 1 %}
+        <span class="page-link" aria-hidden="true">Primeira</span>
+        {% else %}
+        <a
+          class="page-link"
+          href="{{ url_for(request.endpoint, **first_args) }}"
+          aria-label="Ir para a primeira página"
+          >Primeira</a
+        >
+        {% endif %}
+      </li>
+
+      <li class="page-item {{ 'disabled' if not page.has_prev }}">
+        {% if page.has_prev %}
+        <a
+          class="page-link"
+          href="{{ url_for(request.endpoint, **prev_args) }}"
+          aria-label="Ir para a página anterior"
+          >Anterior</a
+        >
+        {% else %}
+        <span class="page-link" aria-hidden="true">Anterior</span>
+        {% endif %}
+      </li>
+
+      {% for page_number in page.iter_pages(left_edge=1, right_edge=1,
+      left_current=1, right_current=2) %} {% if page_number %} {% set
+      number_args = request.args.to_dict() %} {% set _ =
+      number_args.update({'page': page_number}) %}
+      <li class="page-item {{ 'active' if page_number == page.page }}">
+        {% if page_number == page.page %}
+        <span class="page-link" aria-current="page">{{ page_number }}</span>
+        {% else %}
+        <a
+          class="page-link"
+          href="{{ url_for(request.endpoint, **number_args) }}"
+          aria-label="Ir para a página {{ page_number }}"
+          >{{ page_number }}</a
+        >
+        {% endif %}
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %} {% endfor %} {% set next_args = request.args.to_dict() %} {%
+      set _ = next_args.update({'page': page.next_num}) %} {% set last_args =
+      request.args.to_dict() %} {% set _ = last_args.update({'page':
+      page.pages}) %}
+
+      <li class="page-item {{ 'disabled' if not page.has_next }}">
+        {% if page.has_next %}
+        <a
+          class="page-link"
+          href="{{ url_for(request.endpoint, **next_args) }}"
+          aria-label="Ir para a próxima página"
+          >Próxima</a
+        >
+        {% else %}
+        <span class="page-link" aria-hidden="true">Próxima</span>
+        {% endif %}
+      </li>
+
+      <li class="page-item {{ 'disabled' if page.page == page.pages }}">
+        {% if page.page == page.pages %}
+        <span class="page-link" aria-hidden="true">Última</span>
+        {% else %}
+        <a
+          class="page-link"
+          href="{{ url_for(request.endpoint, **last_args) }}"
+          aria-label="Ir para a última página"
+          >Última</a
+        >
+        {% endif %}
+      </li>
+    </ul>
+  </div>
+</nav>
+{% endif %}

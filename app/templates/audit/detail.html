@@ -1,0 +1,150 @@
+{% extends "base.html" %} {% block title %}Auditoria #{{ audit_log.id_audit_log
+}} • {{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4"
+>
+  <div>
+    <a
+      class="btn btn-outline-secondary btn-sm mb-3"
+      href="{{ url_for('audit.index') }}"
+    >
+      Voltar para auditoria
+    </a>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Auditoria</p>
+    <h1 class="h3 fw-bold mb-1">Registro #{{ audit_log.id_audit_log }}</h1>
+    <p class="text-muted mb-0">
+      Visualização detalhada do evento registrado, incluindo contexto, usuário e
+      alterações.
+    </p>
+  </div>
+  <span class="badge text-bg-light border align-self-start align-self-lg-end">
+    {{ audit_log.occurred_at or audit_log.created_at }}
+  </span>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <section
+      class="card rounded-4 border shadow-sm h-100"
+      aria-labelledby="audit-summary-title"
+    >
+      <div class="card-body p-4">
+        <div
+          class="d-flex justify-content-between align-items-start gap-3 mb-3"
+        >
+          <div>
+            <h2 id="audit-summary-title" class="h5 fw-bold mb-1">
+              Resumo do evento
+            </h2>
+            <p class="text-muted small mb-0">
+              Informações principais do registro.
+            </p>
+          </div>
+          <span class="badge text-bg-secondary"
+            >{{ audit_log.resultado or '-' }}</span
+          >
+        </div>
+
+        <dl class="row gy-3 mb-0">
+          <dt class="col-sm-4 text-muted">Ação</dt>
+          <dd class="col-sm-8 mb-0">
+            <code>{{ audit_log.acao or '-' }}</code>
+          </dd>
+
+          <dt class="col-sm-4 text-muted">Entidade</dt>
+          <dd class="col-sm-8 mb-0">
+            <span class="fw-semibold">{{ audit_log.entidade or '-' }}</span>
+            {% if audit_log.entidade_id %}
+            <span class="text-muted">#{{ audit_log.entidade_id }}</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-4 text-muted">Usuário</dt>
+          <dd class="col-sm-8 mb-0 text-break">
+            {{ audit_log.usuario_email or '-' }}
+          </dd>
+
+          <dt class="col-sm-4 text-muted">IP</dt>
+          <dd class="col-sm-8 mb-0"><code>{{ audit_log.ip or '-' }}</code></dd>
+
+          <dt class="col-sm-4 text-muted">Quando</dt>
+          <dd class="col-sm-8 mb-0">
+            {{ audit_log.occurred_at or audit_log.created_at }}
+          </dd>
+
+          <dt class="col-sm-4 text-muted">Correlação</dt>
+          <dd class="col-sm-8 mb-0 text-break">
+            <code>{{ audit_log.correlation_id or '-' }}</code>
+          </dd>
+        </dl>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-7">
+    <section
+      class="card rounded-4 border shadow-sm mb-4"
+      aria-labelledby="audit-reason-title"
+    >
+      <div class="card-body p-4">
+        <h2 id="audit-reason-title" class="h6 fw-bold mb-2">Motivo</h2>
+        <p class="mb-0 text-break">
+          {{ audit_log.motivo or 'Nenhum motivo informado para este evento.' }}
+        </p>
+      </div>
+    </section>
+
+    <section
+      class="card rounded-4 border shadow-sm mb-4"
+      aria-labelledby="audit-before-title"
+    >
+      <div class="card-body p-4">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+        >
+          <div>
+            <h2 id="audit-before-title" class="h6 fw-bold mb-1">
+              Estado anterior
+            </h2>
+            <p class="text-muted small mb-0">
+              Dados registrados antes da alteração.
+            </p>
+          </div>
+        </div>
+        <pre
+          class="small bg-body-tertiary rounded-3 p-3 mb-0 overflow-auto"
+          tabindex="0"
+        >
+{{ audit_log.antes or '-' }}</pre
+        >
+      </div>
+    </section>
+
+    <section
+      class="card rounded-4 border shadow-sm"
+      aria-labelledby="audit-after-title"
+    >
+      <div class="card-body p-4">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+        >
+          <div>
+            <h2 id="audit-after-title" class="h6 fw-bold mb-1">
+              Estado posterior
+            </h2>
+            <p class="text-muted small mb-0">
+              Dados registrados depois da alteração.
+            </p>
+          </div>
+        </div>
+        <pre
+          class="small bg-body-tertiary rounded-3 p-3 mb-0 overflow-auto"
+          tabindex="0"
+        >
+{{ audit_log.depois or '-' }}</pre
+        >
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

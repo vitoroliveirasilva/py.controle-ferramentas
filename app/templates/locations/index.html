@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Locais • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center mb-4">
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Cadastros</p>
+    <h1 class="h3 fw-bold mb-1">Locais</h1>
+    <p class="text-muted mb-0">Filiais, oficinas, sites e almoxarifados usados na custódia e movimentação de ferramentas.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('locations.create') }}">Novo local</a>
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4" method="get">
+  <div class="row g-3 align-items-end">
+    <div class="col-lg-5">
+      <label class="form-label" for="q">Busca</label>
+      <input id="q" class="form-control" name="q" value="{{ search }}" placeholder="Nome, código, filial ou departamento" />
+    </div>
+    <div class="col-md-4 col-lg-3">
+      <label class="form-label" for="tipo">Tipo</label>
+      <select id="tipo" class="form-select" name="tipo">
+        <option value="">Todos os tipos</option>
+        {% for value, label in location_types %}
+        <option value="{{ value }}" {{ 'selected' if location_type == value }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <label class="form-label" for="status">Status</label>
+      <select id="status" class="form-select" name="status">
+        <option value="">Todos</option>
+        <option value="ativo" {{ 'selected' if status == 'ativo' }}>Ativos</option>
+        <option value="inativo" {{ 'selected' if status == 'inativo' }}>Inativos</option>
+      </select>
+    </div>
+    <div class="col-md-4 col-lg-2 d-grid">
+      <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<div class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0 responsive-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Tipo</th>
+          <th>Filial</th>
+          <th>Status</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for location in page.items %}
+        <tr>
+          <td data-label="Código"><code>{{ location.codigo }}</code></td>
+          <td data-label="Nome">
+            <div class="fw-semibold">{{ location.nome }}</div>
+            {% if location.departamento %}<div class="small text-muted">{{ location.departamento }}</div>{% endif %}
+          </td>
+          <td data-label="Tipo"><span class="badge text-bg-light border">{{ location.tipo_local }}</span></td>
+          <td data-label="Filial">{{ location.filial or '-' }}</td>
+          <td data-label="Status">
+            <span class="badge text-bg-{{ 'success' if location.ativo else 'secondary' }}">
+              {{ 'Ativo' if location.ativo else 'Inativo' }}
+            </span>
+          </td>
+          <td data-label="Ações" class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('locations.edit', location_id=location.id_location) }}">Editar</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-5">
+            Nenhum local encontrado com os filtros informados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "components/pagination.html" %}
+{% endblock %}

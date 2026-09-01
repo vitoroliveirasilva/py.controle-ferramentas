@@ -1,0 +1,74 @@
+{# Componente reutilizável para páginas de erro. Variáveis esperadas, definidas
+pelo template chamador: - error_code: código HTTP exibido ao usuário. -
+error_label: rótulo curto do erro. - error_title: título principal. Normalmente
+usa `message` quando informado pelo backend. - error_description: explicação
+objetiva e personalizada por tipo de erro. - error_hint: orientação prática para
+o usuário. - support_email: opcional. Mantém suporte@brasif.com.br comofallback.
+#} {% set support_email_value = support_email|default("suporte@brasif.com.br",
+true) %} {% set safe_error_code = error_code|default("Erro", true) %} {% set
+safe_error_label = error_label|default("Não foi possível concluir a
+solicitação", true) %} {% set safe_error_title =
+error_title|default(message|default("Não foi possível concluir sua
+solicitação.", true), true) %} {% set safe_error_description =
+error_description|default("O sistema encontrou uma situação inesperada ao
+processar sua solicitação.", true) %} {% set safe_error_hint =
+error_hint|default("Tente novamente. Se o problema continuar, acione o suporte
+com as informações exibidas nesta página.", true) %}
+
+<section
+  class="error-card mx-auto rounded-4 border shadow-sm p-4 p-lg-5"
+  aria-labelledby="error-page-title"
+>
+  <div
+    class="d-flex flex-column align-items-start align-items-sm-center text-start text-sm-center gap-3"
+  >
+    <div
+      class="error-code-badge d-inline-flex align-items-center gap-2 rounded-pill border px-3 py-2"
+    >
+      <span class="error-code-badge__number fw-bold font-monospace"
+        >{{ safe_error_code }}</span
+      >
+      <span class="error-code-badge__label small fw-semibold"
+        >{{ safe_error_label }}</span
+      >
+    </div>
+
+    <div class="error-copy mx-auto">
+      <p class="text-uppercase text-muted fw-semibold small mb-2">
+        Código do erro
+      </p>
+      <h1 id="error-page-title" class="h3 fw-bold mb-3">
+        {{ safe_error_title }}
+      </h1>
+      <p class="text-muted mb-0">{{ safe_error_description }}</p>
+    </div>
+
+    <div class="error-support-box w-100 rounded-4 border p-3 p-md-4 text-start">
+      <p class="fw-semibold mb-2">O que fazer agora</p>
+      <p class="text-muted mb-3">{{ safe_error_hint }}</p>
+      <p class="small text-muted mb-0">
+        Se precisar de ajuda, informe ao suporte o código
+        <strong>{{ safe_error_code }}</strong>, o horário aproximado e a ação
+        realizada. E-mail:
+        <a class="fw-semibold" href="mailto:{{ support_email_value }}"
+          >{{ support_email_value }}</a
+        >.
+      </p>
+    </div>
+
+    <div
+      class="error-actions d-flex flex-column flex-sm-row justify-content-sm-center gap-2 w-100"
+    >
+      <a class="btn btn-primary" href="{{ url_for('main.index') }}"
+        >Voltar ao início</a
+      >
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        onclick="window.history.back()"
+      >
+        Voltar à página anterior
+      </button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,115 @@
+{% extends "base.html" %} {% block title %}Usuários • {{ project_name }}{%
+endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">
+      Administração
+    </p>
+    <h1 class="h3 fw-bold mb-1">Usuários locais</h1>
+    <p class="text-muted mb-0">
+      Usuários autorizados pelo banco após autenticação corporativa.
+    </p>
+  </div>
+  {% if can('users.create') %}
+  <a class="btn btn-primary" href="{{ url_for('users.create') }}"
+    >Novo usuário</a
+  >
+  {% endif %}
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 mb-4" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-lg-7">
+      <label class="form-label" for="users-search">Busca</label>
+      <input
+        id="users-search"
+        class="form-control"
+        name="q"
+        value="{{ search }}"
+        placeholder="Nome, e-mail ou Microsoft OID"
+      />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="users-status">Status</label>
+      <select id="users-status" class="form-select" name="status">
+        <option value="">Todos</option>
+        <option value="ativo" {% if status == "ativo" %}selected{% endif %}>
+          Ativos
+        </option>
+        <option value="inativo" {% if status == "inativo" %}selected{% endif %}
+        > Inativos
+        </option>
+        <option value="bloqueado" {% if status == "bloqueado" %}selected{% endif %}
+        >
+          Bloqueados
+        </option>
+      </select>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<div class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Microsoft OID</th>
+          <th>Status</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in page.items %}
+        <tr>
+          <td data-label="Nome" class="fw-semibold">{{ user.nome }}</td>
+          <td data-label="E-mail">{{ user.email_lower }}</td>
+          <td data-label="Microsoft OID" class="small text-muted text-break">
+            {{ user.microsoft_oid or '-' }}
+          </td>
+          <td data-label="Status">
+            {% if user.bloqueado %}
+            <span class="badge text-bg-danger">Bloqueado</span>
+            {% elif user.ativo %}
+            <span class="badge text-bg-success">Ativo</span>
+            {% else %}
+            <span class="badge text-bg-secondary">Inativo</span>
+            {% endif %}
+          </td>
+          <td data-label="Ações" class="text-end">
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+              {% if can('users.update') %}
+              <a
+                class="btn btn-sm btn-outline-primary"
+                href="{{ url_for('users.edit', user_id=user.id_usuario) }}"
+                >Editar</a
+              >
+              {% endif %} {% if can('users.disable') %}
+              <a
+                class="btn btn-sm btn-outline-secondary"
+                href="{{ url_for('users.status', user_id=user.id_usuario, action='block' if not user.bloqueado else 'unblock') }}"
+              >
+                {{ 'Desbloquear' if user.bloqueado else 'Bloquear' }}
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-5">
+            Nenhum usuário encontrado com os filtros informados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "components/pagination.html" %} {% endblock %}

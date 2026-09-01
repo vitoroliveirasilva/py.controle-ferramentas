@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}{{ inventory.codigo }} • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4">
+  <div>
+    <a class="btn btn-outline-secondary btn-sm mb-3" href="{{ url_for('inventories.index') }}">
+      Voltar para inventários
+    </a>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Inventário</p>
+    <h1 class="h3 fw-bold mb-1">{{ inventory.codigo }}</h1>
+    <p class="text-muted mb-0">{{ inventory.titulo }}</p>
+  </div>
+
+  <div class="d-flex flex-column flex-sm-row flex-wrap gap-2 w-100 w-lg-auto justify-content-lg-end">
+    {% if can('inventories.perform') and inventory.status in ['em_andamento', 'com_divergencia'] %}
+    <a class="btn btn-success" href="{{ url_for('inventories.scan', inventory_id=inventory.id_inventory) }}">
+      Abrir modo campo
+    </a>
+    {% endif %}
+    {% if can('inventories.update') and inventory.status == 'rascunho' %}
+    <form method="post" action="{{ url_for('inventories.start', inventory_id=inventory.id_inventory) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button class="btn btn-primary w-100" type="submit">Iniciar conferência</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-2">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Status</div>
+      <div class="h5 mb-0 text-capitalize">{{ inventory.status|replace('_', ' ') }}</div>
+    </section>
+  </div>
+  <div class="col-6 col-lg-3">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Escopo</div>
+      <div class="h6 mb-0">{{ inventory.escopo_responsavel_snapshot or inventory.escopo_local_snapshot or '-' }}</div>
+      <div class="small text-muted text-capitalize">{{ inventory.escopo_tipo|replace('_', ' ') }}</div>
+    </section>
+  </div>
+  <div class="col-6 col-lg-2">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Itens conferidos</div>
+      <div class="h5 mb-0">{{ progress.completed }}/{{ progress.total }}</div>
+    </section>
+  </div>
+  <div class="col-6 col-lg-2">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Divergentes</div>
+      <div class="h5 mb-0">{{ progress.divergent }}</div>
+    </section>
+  </div>
+  <div class="col-12 col-lg-3">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Pendências abertas</div>
+      <div class="h5 mb-0">{{ progress.open_divergences }}</div>
+    </section>
+  </div>
+</div>
+
+<section class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
+    <div>
+      <strong>Progresso da conferência</strong>
+      <div class="small text-muted">Avance item por item até não existirem pendências.</div>
+    </div>
+    <span class="badge text-bg-primary">{{ progress.percent }}%</span>
+  </div>
+  <div class="progress" role="progressbar" aria-label="Progresso da conferência" aria-valuenow="{{ progress.percent }}" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar" style="width: {{ progress.percent }}%"></div>
+  </div>
+</section>
+
+{% if progress.open_divergences %}
+<div class="alert alert-warning rounded-4 border shadow-sm d-flex gap-2 align-items-start" role="alert">
+  <span aria-hidden="true">!</span>
+  <div>
+    <strong>Existem divergências abertas.</strong>
+    Regularize todas as divergências antes de enviar o inventário para assinatura ou finalização.
+  </div>
+</div>
+{% endif %}
+
+{% if divergences %}
+<section class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3">
+    <div>
+      <h2 class="h5 mb-1">Divergências do inventário</h2>
+      <p class="text-muted mb-0">Cada divergência exige registro claro da ação tomada.</p>
+    </div>
+  </div>
+
+  <div class="vstack gap-3">
+    {% for divergence in divergences %}
+    <article class="border rounded-4 p-3 {{ 'bg-warning-subtle' if divergence.status == 'aberta' else 'bg-body-tertiary' }}">
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+          <div>
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+              <span class="badge {{ 'text-bg-warning' if divergence.status == 'aberta' else 'text-bg-success' }}">{{ divergence.status|replace('_', ' ') }}</span>
+              <span class="badge text-bg-secondary">{{ divergence.tipo_divergencia|replace('_', ' ') }}</span>
+              <span class="badge text-bg-dark">{{ divergence.severidade }}</span>
+            </div>
+            <p class="mb-1 fw-semibold">{{ divergence.descricao }}</p>
+            {% if divergence.item %}
+            <div class="small text-muted">Item: {{ divergence.item.codigo_interno_snapshot }} • {{ divergence.item.ferramenta_nome_snapshot }}</div>
+            {% endif %}
+            {% if divergence.id_occurrence %}
+            <div class="small text-muted">Ocorrência vinculada: #{{ divergence.id_occurrence }}</div>
+            {% endif %}
+            {% if divergence.id_transfer %}
+            <div class="small text-muted">Transferência vinculada: #{{ divergence.id_transfer }}</div>
+            {% endif %}
+            {% if divergence.resolucao %}
+            <p class="small mt-2 mb-0"><strong>Resolução:</strong> {{ divergence.resolucao }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if can('inventories.resolve_divergence') and divergence.status == 'aberta' %}
+        <form method="post" action="{{ url_for('inventories.resolve_divergence', inventory_id=inventory.id_inventory, divergence_id=divergence.id_inventory_divergence) }}" class="divergence-resolution-form">
+          {{ resolve_form.hidden_tag() }}
+          <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label small">Ação de regularização</label>
+              <select class="form-select form-select-sm" name="acao_regularizacao" required>
+                {% for value, label in divergence_actions %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Ocorrência ID</label>
+              <input class="form-control form-control-sm" name="occurrence_id" type="number" min="1" placeholder="Opcional">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Transferência ID</label>
+              <input class="form-control form-control-sm" name="transfer_id" type="number" min="1" placeholder="Opcional">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Descrição da solução</label>
+              <input class="form-control form-control-sm" name="resolucao" placeholder="Ex.: item localizado" required minlength="5">
+            </div>
+            <div class="col-md-1 d-grid">
+              <button class="btn btn-sm btn-success" type="submit">OK</button>
+            </div>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if can('inventories.perform') and inventory.status in ['em_andamento', 'com_divergencia'] %}
+<section class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4">
+  <div class="mb-3">
+    <h2 class="h5 mb-1">Registrar ferramenta excedente</h2>
+    <p class="text-muted small mb-0">Use quando encontrar uma ferramenta física que não estava prevista na lista do inventário.</p>
+  </div>
+  <form method="post" action="{{ url_for('inventories.register_excess', inventory_id=inventory.id_inventory) }}" class="row g-2 align-items-end">
+    {{ excess_form.hidden_tag() }}
+    <div class="col-md-4">
+      <label class="form-label small">Identificador encontrado</label>
+      <input class="form-control" name="identificador" placeholder="Código interno, ativo ou série" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label small">Contexto</label>
+      <input class="form-control" name="observacao" placeholder="Informe onde foi encontrada e o contexto" required minlength="5">
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-outline-warning" type="submit">Registrar excedente</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+<section class="mb-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between gap-2 align-items-md-center mb-3">
+    <div>
+      <h2 class="h5 mb-1">Itens do inventário</h2>
+      <p class="text-muted small mb-0">Marque o status real de cada ferramenta conforme a conferência em campo.</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    {% for item in inventory.itens %}
+    <div class="col-12">
+      <article class="card rounded-4 border shadow-sm p-3 p-lg-4 inventory-item-card">
+        <div class="d-flex flex-column flex-xl-row justify-content-between gap-3">
+          <div class="flex-grow-1">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+              <code>{{ item.codigo_interno_snapshot }}</code>
+              <span class="badge {{ 'text-bg-warning' if item.status in ['faltante', 'danificado', 'excedente', 'substituido'] else 'text-bg-secondary' }}">{{ item.status|replace('_', ' ') }}</span>
+            </div>
+            <h3 class="h5 mb-2">{{ item.ferramenta_nome_snapshot }}</h3>
+            <div class="small text-muted">Categoria: {{ item.categoria_snapshot or '-' }}</div>
+            <div class="small text-muted">Série: {{ item.numero_serie_snapshot or '-' }} • Ativo: {{ item.ativo_imobilizado_snapshot or '-' }}</div>
+            <div class="small text-muted">Esperado: {{ item.tipo_custodia_esperada }} / {{ item.responsavel_snapshot or item.local_snapshot or '-' }}</div>
+
+            {% if item.tool and item.tool.referencia_foto_path %}
+            <div class="mt-3">
+              <img class="inventory-reference-thumb rounded-3" src="{{ url_for('tools.reference_photo', tool_id=item.tool.id_tool) }}" alt="Foto de referência de {{ item.ferramenta_nome_snapshot }}">
+            </div>
+            {% endif %}
+
+            {% if item.observacao %}
+            <p class="mt-3 mb-0">{{ item.observacao }}</p>
+            {% endif %}
+
+            {% if item.evidencias %}
+            <div class="mt-3 small">
+              <strong>Evidências:</strong>
+              <div class="d-flex flex-wrap gap-2 mt-1">
+                {% for evidence in item.evidencias %}
+                <a class="badge text-bg-light border text-decoration-none" href="{{ url_for('inventories.download_item_evidence', evidence_id=evidence.id_inventory_item_evidence) }}">
+                  {{ evidence.original_filename }}
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if can('inventories.perform') and inventory.status in ['em_andamento', 'com_divergencia'] %}
+          <div class="inventory-actions flex-xl-shrink-0">
+            <div class="d-grid d-sm-flex flex-wrap gap-2 justify-content-xl-end mb-3">
+              {% for quick_status, label, css in [('encontrado', 'Encontrado', 'btn-success'), ('faltante', 'Faltante', 'btn-warning'), ('danificado', 'Danificado', 'btn-danger'), ('nao_aplicavel', 'N/A', 'btn-outline-secondary')] %}
+              <form method="post" action="{{ url_for('inventories.quick_item_status', inventory_id=inventory.id_inventory, item_id=item.id_inventory_item, status=quick_status) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button class="btn btn-sm {{ css }} w-100" type="submit">{{ label }}</button>
+              </form>
+              {% endfor %}
+            </div>
+
+            <form method="post" action="{{ url_for('inventories.update_item_status', inventory_id=inventory.id_inventory, item_id=item.id_inventory_item) }}" class="row g-2 align-items-end">
+              {{ update_form.hidden_tag() }}
+              <div class="col-md-4">
+                <label class="form-label small">Status</label>
+                <select class="form-select form-select-sm" name="item_status">
+                  {% for value, label in item_statuses %}
+                  <option value="{{ value }}" {{ 'selected' if item.status == value }}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Observação</label>
+                <input class="form-control form-control-sm" name="observacao" value="{{ item.observacao or '' }}" placeholder="Observação rápida">
+              </div>
+              <div class="col-md-2 d-grid">
+                <button class="btn btn-sm btn-outline-primary">Salvar</button>
+              </div>
+            </form>
+
+            <form method="post" action="{{ url_for('inventories.upload_item_evidence', inventory_id=inventory.id_inventory, item_id=item.id_inventory_item) }}" enctype="multipart/form-data" class="row g-2 align-items-end mt-2">
+              {{ evidence_form.hidden_tag() }}
+              <div class="col-md-5">
+                <label class="form-label small">Evidência</label>
+                <input class="form-control form-control-sm" type="file" name="evidencia" accept="image/png,image/jpeg,image/webp,application/pdf">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label small">Observação</label>
+                <input class="form-control form-control-sm" name="observacao" placeholder="Observação da evidência">
+              </div>
+              <div class="col-md-2 d-grid">
+                <button class="btn btn-sm btn-outline-dark">Anexar</button>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+    {% else %}
+    <div class="col-12">
+      <div class="alert alert-info rounded-4 mb-0">Nenhum item carregado para este inventário.</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if can('inventories.finish') and inventory.status in ['em_andamento', 'com_divergencia'] %}
+<section class="card rounded-4 border shadow-sm p-3 p-lg-4 mt-4">
+  <h2 class="h5 mb-1">Enviar para assinatura ou finalização</h2>
+  <p class="text-muted small">O sistema bloqueia esta ação se houver item pendente ou divergência aberta.</p>
+  <form method="post" action="{{ url_for('inventories.finish', inventory_id=inventory.id_inventory) }}" class="row g-2 align-items-end">
+    {{ finish_form.hidden_tag() }}
+    <div class="col-md-10">{{ finish_form.motivo(class='form-control', rows=2, placeholder='Observação opcional de fechamento') }}</div>
+    <div class="col-md-2 d-grid"><button class="btn btn-success" type="submit">Enviar</button></div>
+  </form>
+</section>
+{% endif %}
+
+{% if can('inventories.sign') and inventory.status == 'aguardando_assinatura' %}
+<section class="card rounded-4 border shadow-sm p-3 p-lg-4 mt-4">
+  <h2 class="h5 mb-1">Assinar e finalizar inventário</h2>
+  <p class="text-muted small">Esta assinatura registra usuário, data e hora, IP, navegador e contexto da operação.</p>
+  <form method="post" action="{{ url_for('inventories.sign', inventory_id=inventory.id_inventory) }}" class="row g-2 align-items-end">
+    {{ signature_form.hidden_tag() }}
+    <div class="col-md-9">{{ signature_form.motivo(class='form-control', rows=2, placeholder='Justificativa da assinatura') }}</div>
+    <div class="col-md-3 d-grid gap-2">
+      <label class="form-check small mb-0">{{ signature_form.confirmar(class='form-check-input') }} <span class="form-check-label">Confirmo a assinatura</span></label>
+      <button class="btn btn-success" type="submit">Assinar e finalizar</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% if can('inventories.cancel') and inventory.status in ['rascunho', 'em_andamento', 'com_divergencia'] %}
+<section class="card rounded-4 border shadow-sm p-3 p-lg-4 mt-4">
+  <h2 class="h5 mb-1">Cancelar inventário</h2>
+  <p class="text-muted small">Informe um motivo objetivo para manter o histórico compreensível.</p>
+  <form method="post" action="{{ url_for('inventories.cancel', inventory_id=inventory.id_inventory) }}" class="row g-2 align-items-end">
+    {{ cancel_form.hidden_tag() }}
+    <div class="col-md-10">{{ cancel_form.motivo(class='form-control', rows=2, placeholder='Informe o motivo do cancelamento') }}</div>
+    <div class="col-md-2 d-grid"><button class="btn btn-outline-danger" type="submit">Cancelar</button></div>
+  </form>
+</section>
+{% endif %}
+
+{% include 'components/signatures_card.html' %}
+{% endblock %}

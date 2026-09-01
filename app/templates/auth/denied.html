@@ -1,0 +1,28 @@
+{% extends "base.html" %} {% block title %}Acesso negado • {{ project_name }}{%
+endblock %} {% block content %}
+<section
+  class="error-card mx-auto rounded-4 border shadow-sm p-4 p-lg-5 text-center"
+  aria-labelledby="access-denied-title"
+>
+  <span class="error-code-badge badge border mb-3">Acesso negado</span>
+  <h1 id="access-denied-title" class="h3 fw-bold mb-3">
+    Você autenticou, mas não possui permissão para acessar esta área.
+  </h1>
+  <p class="error-copy text-muted mx-auto mb-4">
+    O cadastro local, o status do usuário ou as permissões necessárias podem não
+    estar liberados. Solicite a revisão ao administrador do sistema ou acione o
+    suporte: suporte@brasif.com.br.
+  </p>
+  <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+    <a class="btn btn-primary" href="{{ url_for('main.index') }}"
+      >Voltar ao início</a
+    >
+    <a
+      class="btn btn-outline-secondary"
+      href="mailto:suporte@brasif.com.br?subject=Acesso%20negado%20-%20{{ project_name|urlencode }}"
+    >
+      Enviar e-mail ao suporte
+    </a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends "base.html" %} {% block title %}Linha do tempo • {{
+tool.codigo_interno }} • {{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Custódia</p>
+    <h1 class="h3 fw-bold mb-1">
+      <code>{{ tool.codigo_interno }}</code> {{ tool.nome }}
+    </h1>
+    <p class="text-muted mb-0">
+      Linha do tempo e histórico de responsabilidade da ferramenta.
+    </p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('custody.index') }}"
+      >Custódias atuais</a
+    >
+    <a class="btn btn-outline-secondary" href="{{ url_for('tools.index') }}"
+      >Ferramentas</a
+    >
+    {% if not current_custody and can('custody.assign_initial') %}
+    <a
+      class="btn btn-primary"
+      href="{{ url_for('custody.initial', tool_id=tool.id_tool) }}"
+      >Definir custódia inicial</a
+    >
+    {% endif %} {% if current_custody and can('custody.force_change') %}
+    <a
+      class="btn btn-outline-danger"
+      href="{{ url_for('custody.change', tool_id=tool.id_tool) }}"
+      >Alteração administrativa</a
+    >
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-5">
+    <section class="card rounded-4 border shadow-sm h-100">
+      <div class="card-body p-4">
+        <h2 class="h5 fw-bold mb-1">Custódia atual</h2>
+        <p class="text-muted small mb-3">
+          Responsável ou local onde a ferramenta está registrada neste momento.
+        </p>
+        {% if current_custody %}
+        <dl class="row mb-0 detail-list">
+          <dt class="col-sm-4">Tipo</dt>
+          <dd class="col-sm-8">
+            <span class="badge text-bg-primary"
+              >{{ current_custody.tipo_custodia }}</span
+            >
+          </dd>
+
+          <dt class="col-sm-4">Responsável</dt>
+          <dd class="col-sm-8">
+            {{ current_custody.responsavel_snapshot or '-' }}
+          </dd>
+
+          <dt class="col-sm-4">Local</dt>
+          <dd class="col-sm-8">{{ current_custody.local_snapshot or '-' }}</dd>
+
+          <dt class="col-sm-4">Desde</dt>
+          <dd class="col-sm-8">
+            {{ current_custody.inicio_em.strftime('%d/%m/%Y %H:%M') if
+            current_custody.inicio_em else '-' }}
+          </dd>
+        </dl>
+        {% else %}
+        <div class="alert alert-warning rounded-4 mb-0" role="alert">
+          Esta ferramenta ainda não possui custódia atual definida.
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-7">
+    <section class="card rounded-4 border shadow-sm h-100 overflow-hidden">
+      <div class="card-header bg-transparent border-0 px-4 pt-4 pb-2">
+        <h2 class="h5 fw-bold mb-1">Histórico de custódia</h2>
+        <p class="text-muted small mb-0">
+          Registros anteriores e vigentes da ferramenta.
+        </p>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Responsável</th>
+              <th>Início</th>
+              <th>Fim</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in history %}
+            <tr>
+              <td data-label="Responsável">
+                {{ item.responsavel_snapshot or '-' }}
+                <div class="small text-muted">
+                  {{ item.local_snapshot or item.tipo_custodia or '-' }}
+                </div>
+              </td>
+              <td data-label="Início">
+                {{ item.inicio_em.strftime('%d/%m/%Y %H:%M') if item.inicio_em
+                else '-' }}
+              </td>
+              <td data-label="Fim">
+                {{ item.fim_em.strftime('%d/%m/%Y %H:%M') if item.fim_em else
+                'Atual' }}
+              </td>
+              <td data-label="Motivo">{{ item.motivo_inicio or '-' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">
+                Sem histórico de custódia.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<section class="card rounded-4 border shadow-sm">
+  <div class="card-body p-4">
+    <h2 class="h5 fw-bold mb-1">Linha do tempo</h2>
+    <p class="text-muted small mb-4">
+      Eventos operacionais relacionados à ferramenta.
+    </p>
+    <div class="timeline-stack">
+      {% for event in timeline %}
+      <div class="timeline-item">
+        <div class="fw-semibold">{{ event.titulo }}</div>
+        <div class="small text-muted">
+          {{ event.occurred_at.strftime('%d/%m/%Y %H:%M') if event.occurred_at
+          else '-' }} • {{ event.actor_email or 'sistema' }}
+        </div>
+        <p class="mb-0">{{ event.descricao or '-' }}</p>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">Nenhum evento registrado.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

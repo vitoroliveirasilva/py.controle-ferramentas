@@ -1,0 +1,216 @@
+<nav class="navbar navbar-expand-xl app-navbar border-bottom sticky-top" aria-label="Navegação principal">
+  <div class="container-xxl">
+    <a
+      class="navbar-brand d-flex align-items-center gap-2 fw-bold"
+      href="{{ url_for('main.index') }}"
+      aria-label="Ir para a página inicial"
+    >
+      <span class="navbar-brand-mark" aria-hidden="true">CF</span>
+      <span class="navbar-brand-text">{{ project_name }}</span>
+    </a>
+
+    <div class="d-flex align-items-center gap-2 order-xl-3 ms-auto">
+      <button
+        class="btn btn-icon theme-toggle"
+        type="button"
+        data-theme-toggle
+        aria-label="Alternar entre tema claro e escuro"
+        title="Alternar tema"
+      >
+        <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+        <span class="visually-hidden" data-theme-toggle-label>Tema</span>
+      </button>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#appNavbar"
+        aria-controls="appNavbar"
+        aria-expanded="false"
+        aria-label="Abrir ou fechar menu de navegação"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+
+    <div class="collapse navbar-collapse order-xl-2" id="appNavbar">
+      <ul class="navbar-nav ms-xl-auto align-items-xl-center gap-xl-1 py-3 py-xl-0">
+        {% set endpoint = request.endpoint or '' %}
+
+        {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a
+              class="nav-link {{ 'active' if endpoint == 'main.index' }}"
+              href="{{ url_for('main.index') }}"
+              {% if endpoint == 'main.index' %}aria-current="page"{% endif %}
+            >Início</a>
+          </li>
+
+          {% if can('dashboard.view') %}
+            <li class="nav-item">
+              <a
+                class="nav-link {{ 'active' if endpoint.startswith('dashboard.') }}"
+                href="{{ url_for('dashboard.index') }}"
+                {% if endpoint.startswith('dashboard.') %}aria-current="page"{% endif %}
+              >Painel</a>
+            </li>
+          {% endif %}
+
+          {% if can('tools.view') or can('custody.view') or can('transfers.view') or can('inventories.view') or can('occurrences.view') %}
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle {{ 'active' if endpoint.startswith('tools.') or endpoint.startswith('custody.') or endpoint.startswith('transfers.') or endpoint.startswith('inventories.') or endpoint.startswith('occurrences.') }}"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >Operação</a>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><h2 class="dropdown-header small text-uppercase">Rotina operacional</h2></li>
+                {% if can('tools.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint == 'tools.index' }}" href="{{ url_for('tools.index') }}">Ferramentas</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint == 'tools.lookup' }}" href="{{ url_for('tools.lookup') }}">Leitura / QR Code</a>
+                  </li>
+                {% endif %}
+                {% if can('custody.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('custody.') }}" href="{{ url_for('custody.index') }}">Custódias</a>
+                  </li>
+                {% endif %}
+                {% if can('transfers.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('transfers.') }}" href="{{ url_for('transfers.index') }}">Transferências</a>
+                  </li>
+                {% endif %}
+                {% if can('inventories.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('inventories.') }}" href="{{ url_for('inventories.index') }}">Inventários</a>
+                  </li>
+                {% endif %}
+                {% if can('occurrences.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('occurrences.') }}" href="{{ url_for('occurrences.index') }}">Ocorrências</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </li>
+          {% endif %}
+
+          {% if can('users.view') or can('categories.manage') or can('locations.manage') or can_any(['roles.view', 'permissions.manage']) %}
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle {{ 'active' if endpoint.startswith('users.') or endpoint.startswith('categories.') or endpoint.startswith('locations.') or endpoint.startswith('permissions.') }}"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >Administração</a>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><h2 class="dropdown-header small text-uppercase">Cadastros e acessos</h2></li>
+                {% if can('users.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('users.') }}" href="{{ url_for('users.index') }}">Usuários</a>
+                  </li>
+                {% endif %}
+                {% if can('categories.manage') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('categories.') }}" href="{{ url_for('categories.index') }}">Categorias</a>
+                  </li>
+                {% endif %}
+                {% if can('locations.manage') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('locations.') }}" href="{{ url_for('locations.index') }}">Locais</a>
+                  </li>
+                {% endif %}
+                {% if can_any(['roles.view', 'permissions.manage']) %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint == 'permissions.index' }}" href="{{ url_for('permissions.index') }}">Acessos</a>
+                  </li>
+                {% endif %}
+                {% if can('roles.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint == 'permissions.my_access' }}" href="{{ url_for('permissions.my_access') }}">Meu acesso</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </li>
+          {% endif %}
+
+          {% if can('notifications.view') or can('reports.view') or can('audit.view') %}
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle {{ 'active' if endpoint.startswith('notifications.') or endpoint.startswith('reports.') or endpoint.startswith('signatures.') or endpoint.startswith('audit.') }}"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >Governança</a>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><h2 class="dropdown-header small text-uppercase">Controles e evidências</h2></li>
+                {% if can('notifications.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('notifications.') }}" href="{{ url_for('notifications.index') }}">Notificações</a>
+                  </li>
+                {% endif %}
+                {% if can('reports.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('reports.') }}" href="{{ url_for('reports.index') }}">Relatórios</a>
+                  </li>
+                {% endif %}
+                {% if can('audit.view') %}
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('signatures.') }}" href="{{ url_for('signatures.index') }}">Assinaturas</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item {{ 'active' if endpoint.startswith('audit.') }}" href="{{ url_for('audit.index') }}">Auditoria</a>
+                  </li>
+                {% endif %}
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('health.health_check') }}">Health check</a>
+                </li>
+              </ul>
+            </li>
+          {% endif %}
+
+          <li class="nav-item dropdown user-menu ms-xl-1">
+            <a
+              class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              aria-label="Menu do usuário {{ current_user.display_name }}"
+            >
+              <span class="user-avatar" aria-hidden="true">{{ (current_user.display_name or 'U')[:1]|upper }}</span>
+              <span class="user-name">{{ current_user.display_name }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+              <li>
+                <span class="dropdown-item-text small text-muted">Sessão ativa</span>
+              </li>
+              <li>
+                <span class="dropdown-item-text fw-semibold text-wrap">{{ current_user.display_name }}</span>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <form method="post" action="{{ url_for('auth.logout') }}" class="px-3 py-1">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button type="submit" class="btn btn-outline-secondary w-100">Sair com segurança</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        {% else %}
+          <li class="nav-item ms-xl-2">
+            <a class="btn btn-primary" href="{{ url_for('auth.login') }}">Entrar</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

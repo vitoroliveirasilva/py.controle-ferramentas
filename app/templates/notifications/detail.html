@@ -1,0 +1,140 @@
+{% extends "base.html" %} {% block title %}{{ notification.codigo }} •
+Notificações • {{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Notificação</p>
+    <h1 class="h3 fw-bold mb-1">{{ notification.titulo }}</h1>
+    <p class="text-muted mb-0">
+      <code>{{ notification.codigo }}</code>
+      <span class="mx-1">•</span>
+      <span
+        class="badge text-bg-{{ 'success' if notification.status == 'lida' else 'warning' }}"
+        >{{ notification.status }}</span
+      >
+    </p>
+  </div>
+  <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-lg-auto">
+    <a
+      class="btn btn-outline-secondary"
+      href="{{ url_for('notifications.index') }}"
+      >Voltar</a
+    >
+    {% if notification.url %}
+    <a class="btn btn-primary" href="{{ notification.url }}">Abrir pendência</a>
+    {% endif %} {% if notification.status != 'lida' %}
+    <form
+      method="post"
+      action="{{ url_for('notifications.mark_read', notification_id=notification.id_notification) }}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button class="btn btn-outline-primary w-100" type="submit">
+        Marcar como lida
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <section class="card rounded-4 border shadow-sm p-4 h-100">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div>
+          <h2 class="h5 fw-semibold mb-1">Mensagem</h2>
+          <p class="text-muted small mb-0">
+            Descrição da pendência ou aviso gerado pelo sistema.
+          </p>
+        </div>
+        <span class="badge text-bg-light border"
+          >{{ notification.prioridade }}</span
+        >
+      </div>
+      <p class="mb-0 fs-6">{{ notification.mensagem }}</p>
+    </section>
+  </div>
+
+  <div class="col-lg-4">
+    <section class="card rounded-4 border shadow-sm p-4 h-100">
+      <h2 class="h5 fw-semibold mb-3">Metadados</h2>
+      <dl class="row small mb-0">
+        <dt class="col-5">Tipo</dt>
+        <dd class="col-7">{{ notification.tipo_notificacao }}</dd>
+        <dt class="col-5">Prioridade</dt>
+        <dd class="col-7">{{ notification.prioridade }}</dd>
+        <dt class="col-5">Canal</dt>
+        <dd class="col-7">{{ notification.canal }}</dd>
+        <dt class="col-5">Entidade</dt>
+        <dd class="col-7">
+          {{ notification.entidade or '-' }} #{{ notification.entidade_id or '-'
+          }}
+        </dd>
+        <dt class="col-5">Destino</dt>
+        <dd class="col-7 text-break">
+          {{ notification.destinatario_email or '-' }}
+        </dd>
+        <dt class="col-5">Criada em</dt>
+        <dd class="col-7">{{ notification.created_at }}</dd>
+        <dt class="col-5">Lida em</dt>
+        <dd class="col-7">{{ notification.lida_em or '-' }}</dd>
+        <dt class="col-5">Enviada em</dt>
+        <dd class="col-7">{{ notification.enviada_em or '-' }}</dd>
+      </dl>
+    </section>
+  </div>
+</div>
+
+<section class="card rounded-4 border shadow-sm mt-4 overflow-hidden">
+  <div class="card-body p-4">
+    <div
+      class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3"
+    >
+      <div>
+        <h2 class="h5 fw-semibold mb-1">Histórico de entrega</h2>
+        <p class="text-muted small mb-0">
+          Tentativas de envio e retorno do canal configurado.
+        </p>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0 responsive-table">
+        <thead>
+          <tr>
+            <th>Canal</th>
+            <th>Status</th>
+            <th>Destino</th>
+            <th>Tentativa</th>
+            <th>Resposta</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for delivery in notification.entregas %}
+          <tr>
+            <td data-label="Canal">{{ delivery.canal }}</td>
+            <td data-label="Status">
+              <span class="badge text-bg-light border"
+                >{{ delivery.status }}</span
+              >
+            </td>
+            <td data-label="Destino" class="text-break">
+              {{ delivery.destino or '-' }}
+            </td>
+            <td data-label="Tentativa">{{ delivery.attempted_at }}</td>
+            <td data-label="Resposta" class="text-break">
+              {{ delivery.resposta or '-' }}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              Nenhuma tentativa registrada.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

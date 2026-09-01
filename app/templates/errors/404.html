@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% set error_code = "404" %}
+{% set error_label = "Página não encontrada" %}
+{% set error_title = message|default("A página solicitada não foi encontrada.", true) %}
+{% set error_description = "O endereço acessado pode estar incorreto, ter sido removido ou não estar mais disponível." %}
+{% set error_hint = "Verifique o link acessado ou retorne ao início para navegar pelo menu principal do sistema." %}
+
+{% block title %}Erro 404 • {{ project_name }}{% endblock %}
+
+{% block content %}
+  {% include "errors/_error_page.html" %}
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block title %}Etiqueta {{ tool.codigo_interno }} •
+{{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-print-none d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">QR Code</p>
+    <h1 class="h4 fw-bold mb-1">Etiqueta da ferramenta</h1>
+    <p class="text-muted mb-0">
+      Imprima e fixe a etiqueta em local visível na ferramenta.
+    </p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a
+      class="btn btn-outline-secondary"
+      href="{{ url_for('tools.edit', tool_id=tool.id_tool) }}"
+      >Voltar</a
+    >
+    <button class="btn btn-primary" type="button" onclick="window.print()">
+      Imprimir etiqueta
+    </button>
+  </div>
+</div>
+
+<div class="qr-label-sheet">
+  <section
+    class="qr-label-card border rounded-4 p-4 text-center bg-white text-dark shadow-sm"
+  >
+    <p class="text-uppercase small fw-semibold text-muted mb-2">
+      Controle de ferramentas
+    </p>
+    <img
+      class="qr-label-code"
+      src="{{ url_for('tools.qr_svg', tool_id=tool.id_tool) }}"
+      alt="QR Code da ferramenta {{ tool.codigo_interno }}"
+    />
+    <h2 class="h5 fw-bold mt-3 mb-1">{{ tool.nome }}</h2>
+    <p class="mb-2"><code>{{ tool.codigo_interno }}</code></p>
+    <div class="small text-muted">
+      <div>Ativo: {{ tool.ativo_imobilizado or '-' }}</div>
+      <div>Série: {{ tool.numero_serie or '-' }}</div>
+    </div>
+  </section>
+</div>
+
+<div class="d-print-none alert alert-info rounded-4 border mt-4 mb-0">
+  Para melhor leitura, evite reduzir demais o tamanho da etiqueta e mantenha
+  contraste adequado na impressão.
+</div>
+{% endblock %}

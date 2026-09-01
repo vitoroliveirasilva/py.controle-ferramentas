@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Ocorrências • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Operação</p>
+    <h1 class="h3 fw-bold mb-1">Ocorrências</h1>
+    <p class="text-muted mb-0">Perdas, danos, baixas, manutenção, calibração e regularizações.</p>
+  </div>
+  {% if can('occurrences.create') %}
+  <a class="btn btn-primary" href="{{ url_for('occurrences.create') }}">Nova ocorrência</a>
+  {% endif %}
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 mb-4" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-7">
+      <label class="form-label" for="occurrence-search">Busca</label>
+      <input id="occurrence-search" class="form-control" name="q" value="{{ search }}" placeholder="Código, ferramenta, ativo ou descrição">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="occurrence-status">Status</label>
+      <select id="occurrence-status" class="form-select" name="status">
+        <option value="">Todos</option>
+        {% for value, label in statuses %}
+        <option value="{{ value }}" {{ 'selected' if status == value }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<section class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Ferramenta</th>
+          <th>Tipo</th>
+          <th>Status</th>
+          <th>Patrimonial</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for occurrence in page.items %}
+        <tr>
+          <td data-label="Código"><code>{{ occurrence.codigo }}</code></td>
+          <td data-label="Ferramenta">
+            <div class="fw-semibold">{{ occurrence.tool.codigo_interno }} - {{ occurrence.tool.nome }}</div>
+            <div class="small text-muted">{{ occurrence.motivo }}</div>
+          </td>
+          <td data-label="Tipo">{{ occurrence.tipo_ocorrencia|replace('_', ' ') }}</td>
+          <td data-label="Status"><span class="badge text-bg-secondary">{{ occurrence.status|replace('_', ' ') }}</span></td>
+          <td data-label="Patrimonial">
+            {% if occurrence.impacto_patrimonial %}
+            <span class="badge text-bg-warning">Sim</span>
+            {% else %}
+            <span class="text-muted">Não</span>
+            {% endif %}
+          </td>
+          <td data-label="Ações" class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('occurrences.detail', occurrence_id=occurrence.id_occurrence) }}">Abrir</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">Nenhuma ocorrência encontrada.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "components/pagination.html" %}
+{% endblock %}

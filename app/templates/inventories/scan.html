@@ -1,0 +1,77 @@
+{% extends "base.html" %} {% block title %}Leitura {{ inventory.codigo }} • {{
+project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Modo campo</p>
+    <h1 class="h3 fw-bold mb-1">Leitura de inventário</h1>
+    <p class="text-muted mb-0">
+      {{ inventory.codigo }} • {{ inventory.titulo }}
+    </p>
+  </div>
+  <a
+    class="btn btn-outline-secondary"
+    href="{{ url_for('inventories.detail', inventory_id=inventory.id_inventory) }}"
+  >
+    Voltar ao inventário
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Status</div>
+      <div class="h5 mb-0">{{ inventory.status|replace('_', ' ') }}</div>
+    </section>
+  </div>
+  <div class="col-6 col-md-4">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Progresso</div>
+      <div class="h5 mb-0">{{ progress.completed }}/{{ progress.total }}</div>
+    </section>
+  </div>
+  <div class="col-12 col-md-4">
+    <section class="card rounded-4 border shadow-sm p-3 h-100">
+      <div class="small text-muted">Pendências</div>
+      <div class="h5 mb-0">{{ progress.pending }}</div>
+    </section>
+  </div>
+</div>
+
+<section class="card rounded-4 border shadow-sm p-3 p-lg-4 mobile-scan-panel">
+  <div class="mb-3">
+    <h2 class="h5 mb-1">Registrar leitura</h2>
+    <p class="text-muted small mb-0">
+      Leia o QR code, código de barras ou digite o identificador da ferramenta.
+    </p>
+  </div>
+
+  <form method="post" class="vstack gap-3">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.codigo.label(class='form-label fw-semibold') }} {{
+      form.codigo(class='form-control form-control-lg scan-input',
+      autofocus=True, inputmode='text', autocomplete='off', placeholder='Leia ou
+      digite o código') }}
+      <div class="form-text">
+        Se o item fizer parte da lista esperada, ele será marcado como
+        encontrado.
+      </div>
+    </div>
+    <div>
+      {{ form.observacao.label(class='form-label') }} {{
+      form.observacao(class='form-control', rows=3, placeholder='Observação
+      opcional, se necessário') }}
+    </div>
+    <button class="btn btn-success btn-lg" type="submit">
+      Marcar como encontrado
+    </button>
+  </form>
+</section>
+
+<div class="alert alert-info rounded-4 mt-4" role="alert">
+  No celular ou coletor, mantenha o campo de código selecionado. A maioria dos
+  leitores USB ou Bluetooth envia o código e confirma automaticamente com Enter.
+</div>
+{% endblock %}

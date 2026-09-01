@@ -1,0 +1,101 @@
+{% extends "base.html" %} {% block title %}Novo inventário • {{ project_name
+}}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Inventários</p>
+    <h1 class="h3 fw-bold mb-1">Novo inventário</h1>
+    <p class="text-muted mb-0">
+      A lista esperada será carregada automaticamente a partir da custódia atual
+      do técnico ou local escolhido.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('inventories.index') }}"
+    >Voltar</a
+  >
+</div>
+
+<form method="post" class="card rounded-4 border shadow-sm p-3 p-lg-4">
+  {{ form.hidden_tag() }}
+
+  <div class="alert alert-info rounded-4 mb-4" role="alert">
+    Selecione apenas um escopo principal: técnico ou local. Essa escolha define
+    quais ferramentas entrarão na conferência.
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-8">
+      <label class="form-label" for="{{ form.titulo.id }}"
+        >{{ form.titulo.label.text }}</label
+      >
+      {{ form.titulo(class='form-control', placeholder='Ex.: Inventário anual da
+      oficina Jundiaí') }}
+      <div class="form-text">
+        Use um título claro para facilitar a busca depois.
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label" for="{{ form.tipo_inventario.id }}"
+        >{{ form.tipo_inventario.label.text }}</label
+      >
+      {{ form.tipo_inventario(class='form-select') }}
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label" for="{{ form.escopo_tipo.id }}"
+        >{{ form.escopo_tipo.label.text }}</label
+      >
+      {{ form.escopo_tipo(class='form-select') }}
+      <div class="form-text">
+        Escolha se a conferência será por técnico ou por local.
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label" for="{{ form.escopo_usuario_id.id }}"
+        >{{ form.escopo_usuario_id.label.text }}</label
+      >
+      {{ form.escopo_usuario_id(class='form-select') }}
+      <div class="form-text">Preencha quando o escopo for técnico.</div>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label" for="{{ form.escopo_location_id.id }}"
+        >{{ form.escopo_location_id.label.text }}</label
+      >
+      {{ form.escopo_location_id(class='form-select') }}
+      <div class="form-text">Preencha quando o escopo for local.</div>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label" for="{{ form.status_inicial.id }}"
+        >{{ form.status_inicial.label.text }}</label
+      >
+      {{ form.status_inicial(class='form-select') }}
+      <div class="form-text">
+        Rascunho permite revisar antes de iniciar. Em andamento já abre a
+        conferência.
+      </div>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label" for="{{ form.descricao.id }}"
+        >{{ form.descricao.label.text }}</label
+      >
+      {{ form.descricao(class='form-control', rows=4, placeholder='Inclua
+      instruções, período, equipe envolvida ou observações importantes') }}
+    </div>
+  </div>
+
+  <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+    <a
+      class="btn btn-outline-secondary"
+      href="{{ url_for('inventories.index') }}"
+      >Cancelar</a
+    >
+    {{ form.submit(class='btn btn-primary') }}
+  </div>
+</form>
+{% endblock %}

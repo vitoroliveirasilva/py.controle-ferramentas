@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% set error_code = "429" %}
+{% set error_label = "Muitas tentativas" %}
+{% set error_title = message|default("Foram feitas muitas solicitações em pouco tempo.", true) %}
+{% set error_description = "O sistema bloqueou temporariamente novas tentativas para proteger a aplicação e evitar uso indevido." %}
+{% set error_hint = "Aguarde alguns instantes antes de tentar novamente. Evite clicar repetidamente no mesmo botão." %}
+
+{% block title %}Erro 429 • {{ project_name }}{% endblock %}
+
+{% block content %}
+  {% include "errors/_error_page.html" %}
+{% endblock %}

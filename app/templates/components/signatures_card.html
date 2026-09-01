@@ -1,0 +1,63 @@
+<section class="card rounded-4 border shadow-sm p-4 mt-4">
+  <div
+    class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-start mb-3"
+  >
+    <div>
+      <p class="text-uppercase text-muted fw-semibold small mb-1">Evidências</p>
+      <h2 class="h5 mb-1">Assinaturas internas</h2>
+      <p class="text-muted small mb-0">
+        Confirmações registradas para ações críticas e rastreáveis do sistema.
+      </p>
+    </div>
+    {% if can('audit.view') %}
+    <a
+      class="btn btn-sm btn-outline-secondary"
+      href="{{ url_for('signatures.index') }}"
+    >
+      Ver auditoria de assinaturas
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="list-group list-group-flush">
+    {% for signature in signatures %}
+    <a
+      class="list-group-item list-group-item-action px-0 py-3"
+      href="{{ url_for('signatures.detail', signature_id=signature.id_signature) }}"
+      aria-label="Ver assinatura {{ signature.codigo }}"
+    >
+      <div class="d-flex flex-column flex-lg-row justify-content-between gap-2">
+        <div class="min-w-0">
+          <div
+            class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-sm-center fw-semibold"
+          >
+            <code>{{ signature.codigo }}</code>
+            <span class="text-muted d-none d-sm-inline" aria-hidden="true"
+              >•</span
+            >
+            <span>{{ signature.acao }}</span>
+          </div>
+          <div class="small text-muted mt-1">
+            {{ signature.usuario_nome }} &lt;{{ signature.usuario_email }}&gt;
+          </div>
+          <div class="small text-muted">Método: {{ signature.metodo }}</div>
+        </div>
+
+        <div class="text-lg-end flex-shrink-0">
+          <span class="badge text-bg-light border"
+            >{{ signature.resultado }}</span
+          >
+          <div class="small text-muted mt-1">
+            {{ signature.signed_at.strftime('%d/%m/%Y %H:%M') if
+            signature.signed_at else '-' }}
+          </div>
+        </div>
+      </div>
+    </a>
+    {% else %}
+    <div class="rounded-4 border bg-body-tertiary p-3 text-muted small">
+      Nenhuma assinatura interna foi registrada até o momento.
+    </div>
+    {% endfor %}
+  </div>
+</section>

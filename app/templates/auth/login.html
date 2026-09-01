@@ -1,0 +1,102 @@
+{% extends "base.html" %} {% block title %}Entrar • {{ project_name }}{%
+endblock %} {% block content %}
+<section
+  class="auth-card mx-auto rounded-4 border shadow-sm p-4 p-lg-5"
+  aria-labelledby="login-title"
+>
+  <div class="text-center text-sm-start mb-4">
+    <p class="text-uppercase text-muted fw-semibold small mb-2">
+      Autenticação corporativa
+    </p>
+    <h1 id="login-title" class="h3 fw-bold mb-3">Entrar no sistema</h1>
+    <p class="text-muted mb-0">
+      Utilize sua conta corporativa Microsoft para acessar o sistema. Após a
+      autenticação, o acesso é validado pelas permissões cadastradas
+      internamente.
+    </p>
+  </div>
+
+  {% if msal_configured and not config.AUTH_DEV_LOGIN_ENABLED %}
+  <div class="alert alert-info d-flex gap-2 align-items-start" role="status">
+    <span class="alert-dot mt-1" aria-hidden="true"></span>
+    <div>
+      <strong>Acesso seguro habilitado.</strong>
+      <div class="small">
+        Você será redirecionado para a autenticação Microsoft.
+      </div>
+    </div>
+  </div>
+
+  <a
+    class="btn btn-primary btn-lg w-100"
+    href="{{ url_for('auth.microsoft_login', next=request.args.get('next')) }}"
+  >
+    Entrar com Microsoft
+  </a>
+
+  <p class="text-muted small text-center mt-3 mb-0">
+    Caso não consiga acessar, solicite a revisão do cadastro e das permissões ao
+    suporte: suporte@brasif.com.br.
+  </p>
+  {% elif config.AUTH_DEV_LOGIN_ENABLED %}
+  <div class="alert alert-warning d-flex gap-2 align-items-start" role="alert">
+    <span class="alert-dot mt-1" aria-hidden="true"></span>
+    <div>
+      <strong>Login de desenvolvimento ativo.</strong>
+      <div class="small">
+        Use somente em ambiente local ou de testes controlados.
+      </div>
+    </div>
+  </div>
+
+  <form
+    method="post"
+    novalidate
+    aria-label="Formulário de login de desenvolvimento"
+  >
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.email.label(class="form-label") }} {{ form.email(
+      class="form-control", placeholder="nome.sobrenome@empresa.com.br",
+      autocomplete="email", inputmode="email" ) }} {% for error in
+      form.email.errors %}
+      <div class="form-text text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.nome.label(class="form-label") }} {{ form.nome(
+      class="form-control", placeholder="Nome exibido apenas para simular as
+      claims", autocomplete="name" ) }}
+    </div>
+
+    <div class="mb-4">
+      {{ form.microsoft_oid.label(class="form-label") }} {{ form.microsoft_oid(
+      class="form-control", placeholder="Opcional. Se vazio, será gerado a
+      partir do e-mail informado", autocomplete="off" ) }}
+      <div class="form-text">
+        Campo utilizado apenas para simulação técnica em desenvolvimento.
+      </div>
+    </div>
+
+    {{ form.submit(class="btn btn-primary btn-lg w-100") }}
+  </form>
+  {% else %}
+  <div
+    class="alert alert-danger d-flex gap-2 align-items-start mb-0"
+    role="alert"
+  >
+    <span class="alert-dot mt-1" aria-hidden="true"></span>
+    <div>
+      <strong>Autenticação indisponível.</strong>
+      <div>
+        A autenticação Microsoft ainda não está configurada e o login de
+        desenvolvimento está desabilitado. Acione o suporte informando o horário
+        e o ambiente acessado: suporte@brasif.com.br.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

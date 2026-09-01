@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block title %}Relatórios • {{ project_name }}{%
+endblock %} {% block content %}
+<section
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">
+      Governança operacional
+    </p>
+    <h1 class="h3 fw-bold mb-1">Relatórios</h1>
+    <p class="text-muted mb-0">
+      Consultas operacionais e patrimoniais com filtros, exportações e visão
+      para PDF.
+    </p>
+  </div>
+</section>
+
+{% if reports %}
+<div class="row g-3">
+  {% for report in reports %}
+  <div class="col-md-6 col-xl-4">
+    <a
+      class="module-card rounded-4 border p-4 h-100 d-flex flex-column text-decoration-none"
+      href="{{ url_for('reports.show', report_code=report.code) }}"
+      aria-label="Abrir relatório {{ report.title }}"
+    >
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div>
+          <p class="text-uppercase text-muted fw-semibold small mb-1">
+            Relatório
+          </p>
+          <h2 class="h5 fw-semibold mb-0">{{ report.title }}</h2>
+        </div>
+        <span class="badge text-bg-light border">{{ report.code }}</span>
+      </div>
+      <p class="text-muted mb-4 flex-grow-1">{{ report.description }}</p>
+      <span class="btn btn-outline-primary align-self-start"
+        >Abrir relatório</span
+      >
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<section class="card rounded-4 border shadow-sm p-4 text-center">
+  <p class="text-uppercase text-muted fw-semibold small mb-2">Sem relatórios</p>
+  <h2 class="h5 fw-semibold mb-2">Nenhum relatório disponível</h2>
+  <p class="text-muted mb-0">
+    Verifique suas permissões ou acione o administrador do sistema caso precise
+    acessar relatórios operacionais.
+  </p>
+</section>
+{% endif %} {% endblock %}

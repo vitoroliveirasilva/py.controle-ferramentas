@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}{{ definition.title }} • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4">
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Relatório</p>
+    <h1 class="h3 fw-bold mb-1">{{ definition.title }}</h1>
+    <p class="text-muted mb-0">{{ definition.description }}</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('reports.index') }}">Voltar</a>
+    <a
+      class="btn btn-outline-primary"
+      href="{{ url_for('reports.print_view', report_code=definition.code) }}{% if filter_query %}?{{ filter_query }}{% endif %}"
+      target="_blank"
+      rel="noopener"
+    >
+      Versão para PDF
+    </a>
+    {% if can('reports.export') %}
+    <a
+      class="btn btn-outline-success"
+      href="{{ url_for('reports.export', report_code=definition.code, export_format='csv') }}{% if filter_query %}?{{ filter_query }}{% endif %}"
+    >
+      CSV
+    </a>
+    <a
+      class="btn btn-success"
+      href="{{ url_for('reports.export', report_code=definition.code, export_format='xlsx') }}{% if filter_query %}?{{ filter_query }}{% endif %}"
+    >
+      Excel
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4" method="get">
+  <div class="d-flex flex-column flex-lg-row justify-content-between gap-2 mb-3">
+    <div>
+      <h2 class="h6 fw-semibold mb-1">Filtros do relatório</h2>
+      <p class="text-muted small mb-0">Use filtros objetivos para reduzir a lista antes de exportar.</p>
+    </div>
+    {% if filter_query %}
+    <a class="btn btn-sm btn-outline-secondary align-self-start align-self-lg-center" href="{{ url_for('reports.show', report_code=definition.code) }}">
+      Limpar filtros
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label" for="report-search">Busca</label>
+      <input
+        id="report-search"
+        class="form-control"
+        name="q"
+        value="{{ filters.q }}"
+        placeholder="Código, nome, ativo ou responsável"
+      />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="report-status">Status</label>
+      <select id="report-status" class="form-select" name="status">
+        <option value="">Todos</option>
+        {% set status_choices = tool_statuses %}
+        {% if definition.code == 'inventarios' %}{% set status_choices = inventory_statuses %}{% endif %}
+        {% if definition.code == 'transferencias' %}{% set status_choices = transfer_statuses %}{% endif %}
+        {% if definition.code == 'ocorrencias' %}{% set status_choices = occurrence_statuses %}{% endif %}
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {{ 'selected' if filters.status == value }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="report-type">Tipo</label>
+      <select id="report-type" class="form-select" name="tipo">
+        <option value="">Todos</option>
+        {% set type_choices = [] %}
+        {% if definition.code == 'inventarios' %}{% set type_choices = inventory_types %}{% endif %}
+        {% if definition.code == 'ocorrencias' %}{% set type_choices = occurrence_types %}{% endif %}
+        {% for value, label in type_choices %}
+        <option value="{{ value }}" {{ 'selected' if filters.tipo == value }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+
+  {% if definition.code == 'situacao-atual' %}
+  <div class="row g-3 mt-1">
+    <div class="col-md-4">
+      <label class="form-label" for="report-category">Categoria</label>
+      <select id="report-category" class="form-select" name="categoria">
+        <option value="">Todas</option>
+        {% for category in categories %}
+        <option value="{{ category.id_categoria }}" {{ 'selected' if filters.categoria|string == category.id_categoria|string }}>
+          {{ category.nome }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+</form>
+
+<div class="alert alert-info rounded-4 border shadow-sm d-flex flex-column flex-md-row justify-content-between gap-2">
+  <span>
+    Exibindo <strong>{{ rows|length }}</strong> de <strong>{{ total }}</strong> registros.
+  </span>
+  <span class="small">
+    Exportações usam o conjunto completo limitado pelo relatório.
+  </span>
+</div>
+
+<div class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0 responsive-table">
+      <thead>
+        <tr>
+          {% if rows %}
+            {% for key in rows[0].keys() %}
+            <th>{{ key|replace('_', ' ')|title }}</th>
+            {% endfor %}
+          {% else %}
+            <th>Resultado</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          {% for key, value in row.items() %}
+          <td data-label="{{ key|replace('_', ' ')|title }}">{{ value or '-' }}</td>
+          {% endfor %}
+        </tr>
+        {% else %}
+        <tr>
+          <td class="text-center text-muted py-4">
+            Nenhum registro encontrado para os filtros informados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

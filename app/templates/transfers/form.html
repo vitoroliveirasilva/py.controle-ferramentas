@@ -1,0 +1,116 @@
+{% extends "base.html" %} {% block title %}Nova transferência • {{ project_name
+}}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-start mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">
+      Transferências
+    </p>
+    <h1 class="h3 fw-bold mb-1">Nova transferência</h1>
+    <p class="text-muted mb-0">
+      Informe o destino e os códigos das ferramentas que serão movimentadas.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('transfers.index') }}"
+    >Voltar</a
+  >
+</div>
+
+<form method="post" class="card rounded-4 border shadow-sm" novalidate>
+  <div class="card-body p-4 p-lg-5">
+    {{ form.hidden_tag() }}
+
+    <div class="alert alert-info rounded-4 mb-4" role="alert">
+      <strong>Orientação:</strong> selecione técnico quando a ferramenta ficar
+      com uma pessoa. Se ficar em oficina, site ou almoxarifado, selecione
+      local.
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        {{ form.tipo_transferencia.label(class='form-label fw-semibold') }} {{
+        form.tipo_transferencia(class='form-select') }} {% for error in
+        form.tipo_transferencia.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.destino_tipo_custodia.label(class='form-label fw-semibold') }}
+        {{ form.destino_tipo_custodia(class='form-select') }} {% for error in
+        form.destino_tipo_custodia.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.destino_usuario_id.label(class='form-label fw-semibold') }} {{
+        form.destino_usuario_id(class='form-select') }}
+        <div class="form-text">
+          Preencha este campo somente quando o destino for técnico.
+        </div>
+        {% for error in form.destino_usuario_id.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.destino_location_id.label(class='form-label fw-semibold') }} {{
+        form.destino_location_id(class='form-select') }}
+        <div class="form-text">
+          Preencha este campo quando o destino for local, oficina, site ou
+          almoxarifado.
+        </div>
+        {% for error in form.destino_location_id.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="col-12">
+        {{ form.codigos_ferramentas.label(class='form-label fw-semibold') }} {{
+        form.codigos_ferramentas(class='form-control font-monospace', rows=7,
+        placeholder='Ex.: FERR-001\nFERR-002\nFERR-003') }}
+        <div class="form-text">
+          {{ form.codigos_ferramentas.description }} Informe um código por linha
+          para facilitar a conferência.
+        </div>
+        {% for error in form.codigos_ferramentas.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="col-12">
+        {{ form.motivo.label(class='form-label fw-semibold') }} {{
+        form.motivo(class='form-control', rows=3, placeholder='Descreva de forma
+        objetiva o motivo da transferência') }} {% for error in
+        form.motivo.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="col-12">
+        {{ form.observacoes.label(class='form-label fw-semibold') }} {{
+        form.observacoes(class='form-control', rows=3, placeholder='Informações
+        complementares, se necessário') }} {% for error in
+        form.observacoes.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="card-footer bg-transparent border-0 px-4 px-lg-5 pb-4 pb-lg-5 pt-0"
+  >
+    <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+      <a
+        class="btn btn-outline-secondary"
+        href="{{ url_for('transfers.index') }}"
+        >Cancelar</a
+      >
+      {{ form.submit(class='btn btn-primary') }}
+    </div>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %} {% block title %}Assinaturas internas • {{
+project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Auditoria</p>
+    <h1 class="h3 fw-bold mb-1">Assinaturas internas</h1>
+    <p class="text-muted mb-0">
+      Evidências de confirmações feitas em ações críticas do sistema.
+    </p>
+  </div>
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 p-lg-4 mb-4" method="get">
+  <div
+    class="d-flex flex-column flex-lg-row justify-content-between gap-2 mb-3"
+  >
+    <div>
+      <h2 class="h6 fw-semibold mb-1">Filtros</h2>
+      <p class="text-muted small mb-0">
+        Pesquise por código, usuário, entidade, ação ou resultado.
+      </p>
+    </div>
+    {% if search or action or result %}
+    <a
+      class="btn btn-sm btn-outline-secondary align-self-start align-self-lg-center"
+      href="{{ url_for('signatures.index') }}"
+    >
+      Limpar filtros
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="row g-3 align-items-end">
+    <div class="col-md-5">
+      <label class="form-label" for="signature-search">Busca</label>
+      <input
+        id="signature-search"
+        class="form-control"
+        name="q"
+        value="{{ search }}"
+        placeholder="Código, usuário ou entidade"
+      />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="signature-action">Ação</label>
+      <input
+        id="signature-action"
+        class="form-control"
+        name="action"
+        value="{{ action }}"
+        placeholder="Ex.: inventories.sign"
+      />
+    </div>
+    <div class="col-md-2">
+      <label class="form-label" for="signature-result">Resultado</label>
+      <input
+        id="signature-result"
+        class="form-control"
+        name="result"
+        value="{{ result }}"
+        placeholder="Confirmado"
+      />
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<div class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0 responsive-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Ação</th>
+          <th>Entidade</th>
+          <th>Usuário</th>
+          <th>Resultado</th>
+          <th>Data/hora</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for signature in page.items %}
+        <tr>
+          <td data-label="Código">
+            <code>{{ signature.codigo }}</code>
+          </td>
+          <td data-label="Ação">{{ signature.acao }}</td>
+          <td data-label="Entidade">
+            {{ signature.entidade }} #{{ signature.entidade_id }}
+          </td>
+          <td data-label="Usuário">
+            {{ signature.usuario_nome }}
+            <div class="small text-muted text-break">
+              {{ signature.usuario_email }}
+            </div>
+          </td>
+          <td data-label="Resultado">
+            <span class="badge text-bg-light border"
+              >{{ signature.resultado }}</span
+            >
+          </td>
+          <td data-label="Data/hora">
+            {{ signature.signed_at.strftime('%d/%m/%Y %H:%M') if
+            signature.signed_at else '-' }}
+          </td>
+          <td data-label="Ações" class="text-end">
+            <a
+              class="btn btn-sm btn-outline-primary"
+              href="{{ url_for('signatures.detail', signature_id=signature.id_signature) }}"
+            >
+              Abrir
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            Nenhuma assinatura encontrada.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "components/pagination.html" %} {% endblock %}

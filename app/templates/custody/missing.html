@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Ferramentas sem custódia • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center mb-4">
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Governança</p>
+    <h1 class="h3 fw-bold mb-1">Ferramentas ativas sem custódia</h1>
+    <p class="text-muted mb-0">Pendências que precisam de custódia inicial para garantir rastreabilidade.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('custody.index') }}">Voltar às custódias</a>
+</div>
+
+<div class="alert alert-warning rounded-4 border shadow-sm" role="alert">
+  Ferramentas ativas sem custódia precisam receber uma custódia inicial antes de entrar no fluxo operacional normal.
+</div>
+
+<section class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Status</th>
+          <th>Categoria</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tool in page.items %}
+        <tr>
+          <td data-label="Código"><code>{{ tool.codigo_interno }}</code></td>
+          <td data-label="Nome">{{ tool.nome }}</td>
+          <td data-label="Status"><span class="badge text-bg-warning">{{ tool.status }}</span></td>
+          <td data-label="Categoria">{{ tool.categoria.nome if tool.categoria else '-' }}</td>
+          <td data-label="Ações" class="text-end">
+            {% if can('custody.assign_initial') %}
+            <a class="btn btn-sm btn-primary" href="{{ url_for('custody.initial', tool_id=tool.id_tool) }}">Definir custódia</a>
+            {% else %}
+            <span class="text-muted small">Sem permissão</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-5">
+            Nenhuma pendência encontrada.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "components/pagination.html" %}
+{% endblock %}

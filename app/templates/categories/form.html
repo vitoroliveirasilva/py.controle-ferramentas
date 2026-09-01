@@ -1,0 +1,166 @@
+{% extends "base.html" %} {% block title %}{{ 'Editar' if category else 'Nova'
+}} categoria • {{ project_name }}{% endblock %} {% block content %}
+<div
+  class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-4"
+>
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Cadastros</p>
+    <h1 class="h3 fw-bold mb-1">
+      {{ 'Editar categoria' if category else 'Nova categoria' }}
+    </h1>
+    <p class="text-muted mb-0">
+      Defina a classificação e as regras operacionais aplicadas às ferramentas
+      desta categoria.
+    </p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('categories.index') }}">
+    Voltar
+  </a>
+</div>
+
+<form
+  method="post"
+  novalidate
+  class="card rounded-4 border shadow-sm overflow-hidden"
+>
+  {{ form.hidden_tag() }}
+
+  <div class="card-body p-4 p-lg-5">
+    <div class="alert alert-info rounded-4 border mb-4" role="note">
+      <div class="fw-semibold mb-1">Orientação</div>
+      <div class="small mb-0">
+        Alterações em código, status ou regras podem afetar cadastros,
+        inventários e relatórios. Registre um motivo claro quando estiver
+        editando uma categoria existente.
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4">
+        {{ form.codigo.label(class='form-label fw-semibold') }} {{
+        form.codigo(class='form-control', placeholder='Ex.: ELETRICA') }} {% for
+        error in form.codigo.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-text">
+          Use um código curto, padronizado e fácil de identificar.
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        {{ form.nome.label(class='form-label fw-semibold') }} {{
+        form.nome(class='form-control', placeholder='Ex.: Ferramentas
+        elétricas') }} {% for error in form.nome.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="col-12">
+        {{ form.descricao.label(class='form-label fw-semibold') }} {{
+        form.descricao(class='form-control', rows=3, placeholder='Descreva
+        quando esta categoria deve ser utilizada') }} {% for error in
+        form.descricao.errors %}
+        <div class="form-text text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="mb-3">
+      <h2 class="h6 fw-bold mb-1">Regras da categoria</h2>
+      <p class="text-muted small mb-0">
+        Marque somente as regras realmente necessárias para evitar retrabalho no
+        cadastro e na operação.
+      </p>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6 col-xl-3">
+        <label
+          class="border rounded-4 p-3 h-100 d-flex gap-3 align-items-start"
+        >
+          {{ form.ativo(class='form-check-input mt-1') }}
+          <span>
+            <span class="fw-semibold d-block">{{ form.ativo.label.text }}</span>
+            <span class="small text-muted"
+              >Categoria disponível para novos cadastros.</span
+            >
+          </span>
+        </label>
+      </div>
+
+      <div class="col-md-6 col-xl-3">
+        <label
+          class="border rounded-4 p-3 h-100 d-flex gap-3 align-items-start"
+        >
+          {{ form.controle_individual_padrao(class='form-check-input mt-1') }}
+          <span>
+            <span class="fw-semibold d-block"
+              >{{ form.controle_individual_padrao.label.text }}</span
+            >
+            <span class="small text-muted"
+              >Indica que cada item deve ser controlado individualmente.</span
+            >
+          </span>
+        </label>
+      </div>
+
+      <div class="col-md-6 col-xl-3">
+        <label
+          class="border rounded-4 p-3 h-100 d-flex gap-3 align-items-start"
+        >
+          {{ form.requer_numero_serie(class='form-check-input mt-1') }}
+          <span>
+            <span class="fw-semibold d-block"
+              >{{ form.requer_numero_serie.label.text }}</span
+            >
+            <span class="small text-muted"
+              >Exige número de série no cadastro da ferramenta.</span
+            >
+          </span>
+        </label>
+      </div>
+
+      <div class="col-md-6 col-xl-3">
+        <label
+          class="border rounded-4 p-3 h-100 d-flex gap-3 align-items-start"
+        >
+          {{ form.requer_calibracao(class='form-check-input mt-1') }}
+          <span>
+            <span class="fw-semibold d-block"
+              >{{ form.requer_calibracao.label.text }}</span
+            >
+            <span class="small text-muted"
+              >Sinaliza controle adicional de calibração.</span
+            >
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      {{ form.motivo.label(class='form-label fw-semibold') }} {{
+      form.motivo(class='form-control', rows=2, placeholder='Informe o motivo da
+      alteração, quando aplicável') }} {% for error in form.motivo.errors %}
+      <div class="form-text text-danger">{{ error }}</div>
+      {% endfor %}
+      <div class="form-text">
+        Obrigatório para alterações sensíveis, como código, status ou regras da
+        categoria.
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer bg-body-tertiary border-top p-3 p-lg-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+      <a
+        class="btn btn-outline-secondary"
+        href="{{ url_for('categories.index') }}"
+        >Cancelar</a
+      >
+      <button class="btn btn-primary" type="submit">Salvar categoria</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

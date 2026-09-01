@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Inventários • {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center mb-4">
+  <div>
+    <p class="text-uppercase text-muted fw-semibold small mb-1">Operação</p>
+    <h1 class="h3 fw-bold mb-1">Inventários</h1>
+    <p class="text-muted mb-0">Acompanhe conferências de ferramentas por técnico ou local.</p>
+  </div>
+  {% if can('inventories.create') %}
+  <a class="btn btn-primary" href="{{ url_for('inventories.create') }}">Novo inventário</a>
+  {% endif %}
+</div>
+
+<form class="card rounded-4 border shadow-sm p-3 mb-4" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label" for="inventory-search">Busca</label>
+      <input id="inventory-search" class="form-control" name="q" value="{{ search }}" placeholder="Código, título, técnico ou local">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="inventory-status">Status</label>
+      <select id="inventory-status" class="form-select" name="status">
+        <option value="">Todos os status</option>
+        {% for value, label in statuses %}
+        <option value="{{ value }}" {{ 'selected' if status == value }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<section class="card rounded-4 border shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Título</th>
+          <th>Status</th>
+          <th>Escopo</th>
+          <th>Tipo</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inventory in page.items %}
+        <tr>
+          <td data-label="Código"><code>{{ inventory.codigo }}</code></td>
+          <td data-label="Título">
+            <div class="fw-semibold">{{ inventory.titulo }}</div>
+            <div class="small text-muted">{{ inventory.created_at.strftime('%d/%m/%Y %H:%M') if inventory.created_at else '-' }}</div>
+          </td>
+          <td data-label="Status"><span class="badge text-bg-info">{{ inventory.status|replace('_', ' ') }}</span></td>
+          <td data-label="Escopo">
+            <div>{{ inventory.escopo_responsavel_snapshot or inventory.escopo_local_snapshot or '-' }}</div>
+            <div class="small text-muted">{{ inventory.escopo_tipo|replace('_', ' ') }}</div>
+          </td>
+          <td data-label="Tipo">{{ inventory.tipo_inventario|replace('_', ' ') }}</td>
+          <td data-label="Ações" class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('inventories.detail', inventory_id=inventory.id_inventory) }}">Abrir</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">Nenhum inventário encontrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "components/pagination.html" %}
+{% endblock %}
